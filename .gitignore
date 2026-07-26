@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+/docs/
+/.sdd/
+.idea
+
+# Aviasales — captured auth material & live probe dumps (contain real cookies/WAF tokens) — never commit
+curls.txt
+curl.txt
+.sdd/live/
+report.md
+trip.json
+/.superpowers/
+reports/

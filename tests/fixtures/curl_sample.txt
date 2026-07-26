@@ -1,0 +1,21 @@
+curl 'https://tickets-api.eu-north-1.aviasales.ru/search/v3.2/results' \
+  -H 'accept: application/json' \
+  -H 'accept-language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7' \
+  -H 'authorization;' \
+  -H 'content-type: application/json' \
+  -b 'auid=PLACEHOLDER; marker=PLACEHOLDER; _sp_ses.dc27=PLACEHOLDER; nuid=PLACEHOLDER; _gcl_au=PLACEHOLDER; _ym_uid=PLACEHOLDER; _ym_d=PLACEHOLDER; tmr_lvid=PLACEHOLDER; tmr_lvidTS=PLACEHOLDER; _ym_visorc=PLACEHOLDER; _ym_isad=PLACEHOLDER; _clck=PLACEHOLDER; _clsk=PLACEHOLDER; _sp_id.dc27=PLACEHOLDER; uxs_uid=PLACEHOLDER' \
+  -H 'origin: https://www.aviasales.ru' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://www.aviasales.ru/' \
+  -H 'sec-ch-ua: "Not;A=Brand";v="8", "Chromium";v="150", "Google Chrome";v="150"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: same-site' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36' \
+  -H 'x-aws-waf-token: PLACEHOLDER_WAF_TOKEN' \
+  -H 'x-client-type: web' \
+  -H 'x-origin-cookie: auid=PLACEHOLDER; marker=PLACEHOLDER; nuid=PLACEHOLDER; aws-waf-token=PLACEHOLDER_WAF_TOKEN' \
+  -H 'x-request-id: PLACEHOLDER_REQUEST_ID' \
+  --data-raw '{"limit":10,"price_per_person":false,"search_by_airport":false,"search_id":"PLACEHOLDER_SEARCH_ID","last_update_timestamp":1785089314}'

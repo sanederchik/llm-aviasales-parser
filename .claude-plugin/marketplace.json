@@ -1,0 +1,14 @@
+{
+  "name": "aviasales-flight-search",
+  "owner": {
+    "name": "Alexander Makarov"
+  },
+  "description": "Плагин поиска лучших авиаперелётов на aviasales.ru: мультигород-маршруты, жёсткие фильтры, ранжированный Markdown-отчёт по минимальной цене.",
+  "plugins": [
+    {
+      "name": "aviasales-flight-search",
+      "source": "./",
+      "description": "Находит лучшие авиаперелёты на aviasales.ru (включая сложные мультигород-маршруты) и формирует ранжированный Markdown-отчёт по минимальной суммарной цене в рублях."
+    }
+  ]
+}

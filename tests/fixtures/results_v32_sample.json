@@ -1,0 +1,5078 @@
+[
+{
+"chunk_id": "results",
+"last_update_timestamp": 0,
+"tickets": [
+{
+"id": "9a8da3f2894a56428b5e2faccd4d491e",
+"segments": [
+{
+"flights": [
+12,
+11
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+},
+{
+"flights": [
+13,
+14
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "148:626",
+"itinerary_key": "YJ5mJHUZThm_l3D8KiFz4A",
+"price": {
+"currency_code": "RUB",
+"value": 160423
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 80211.5
+},
+"agent_id": 148,
+"flight_terms": {
+"31": {
+"fare_code": "V2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "625"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"48": {
+"fare_code": "V2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8004"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"49": {
+"fare_code": "Q2LSRYAD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "626"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true
+},
+"return_after_flight": {
+"available": true
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"weight": true,
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"50": {
+"fare_code": "Q2AZBYRU",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8027"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true
+},
+"return_after_flight": {
+"available": true
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"weight": true,
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 160423
+},
+"weight": 0.026220625893111648,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R1|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": true
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "20:127",
+"itinerary_key": "YJ5mJHUZThm_l3D8KiFz4A",
+"price": {
+"currency_code": "RUB",
+"value": 174134
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 87067
+},
+"agent_id": 20,
+"flight_terms": {
+"31": {
+"fare_code": "Q2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "625"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"48": {
+"fare_code": "Q2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8004"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"49": {
+"fare_code": "L2LSRYAD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "626"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"50": {
+"fare_code": "L2ASRYRU",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8027"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 174134
+},
+"weight": 0.06113475103690202,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R1|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "70:33",
+"itinerary_key": "YJ5mJHUZThm_l3D8KiFz4A",
+"price": {
+"currency_code": "RUB",
+"value": 174504
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 87252
+},
+"agent_id": 70,
+"flight_terms": {
+"31": {
+"fare_code": "Q2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "625"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"48": {
+"fare_code": "Q2ASRYRS",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8004"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"49": {
+"fare_code": "L2LSRYAD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "626"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"50": {
+"fare_code": "L2ASRYRU",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8027"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"fare_name": "Eco SMART"
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 174504
+},
+"weight": 0.07436981409029886,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R1|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": true,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": true,
+"is_from_config": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+}
+],
+"signature": "9a8da3f2894a56428b5e2faccd4d491e",
+"popularity": 0,
+"score": 0.10733184205085708,
+"hashsum": "3fbcfc8102fdc528",
+"tags": [
+"has_third_country_transfer",
+"with_tech_stops"
+],
+"extra_fares": {},
+"position": 64
+},
+{
+"id": "5a018e035f593a40a3d223c18c14cce8",
+"segments": [
+{
+"flights": [
+8,
+9
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+},
+{
+"flights": [
+6,
+7
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "65:31",
+"itinerary_key": "TaeYqw9Vz5f29HsWTGkRhQ",
+"price": {
+"currency_code": "RUB",
+"value": 148186
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 74093
+},
+"agent_id": 65,
+"flight_terms": {
+"15": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "479"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"16": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "845"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"21": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "842"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"24": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 148186
+},
+"weight": 0.07361553801205632,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P0|H1|L0|CH0|R0|TBC0",
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "20:36",
+"itinerary_key": "TaeYqw9Vz5f29HsWTGkRhQ",
+"price": {
+"currency_code": "RUB",
+"value": 148749
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 74374.5
+},
+"agent_id": 20,
+"flight_terms": {
+"15": {
+"fare_code": "ELN2IH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "479"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"16": {
+"fare_code": "ELN2IH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "845"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"21": {
+"fare_code": "ULN2CH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "842"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"24": {
+"fare_code": "ULN2CH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 148749
+},
+"weight": 0.0496584743545897,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P0|H1|L0|CH0|R0|TBC0",
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "1:140",
+"itinerary_key": "TaeYqw9Vz5f29HsWTGkRhQ",
+"price": {
+"currency_code": "RUB",
+"value": 148955
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 74477.5
+},
+"agent_id": 1,
+"flight_terms": {
+"15": {
+"fare_code": "ELN2IH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "479"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": false,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"16": {
+"fare_code": "ELN2IH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "845"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": false,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"21": {
+"fare_code": "ULN2CH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "842"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": false,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"24": {
+"fare_code": "ULN2CH29",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": false,
+"is_from_config": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {
+"available": true,
+"penalty_currency_code": true,
+"penalty_value": true
+},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 148955
+},
+"weight": 0.061083187843010915,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P0|H1|L0|CH0|R0|TBC0",
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"return_before_flight": {
+"available": false,
+"is_from_config": true
+},
+"change_before_flight": {
+"available": false,
+"is_from_config": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+}
+],
+"signature": "5a018e035f593a40a3d223c18c14cce8",
+"popularity": 0,
+"score": 0.0805627416546974,
+"hashsum": "c5e5e5defafa08cf",
+"tags": [
+"has_third_country_transfer"
+],
+"badges": [
+{
+"type": "optimal_manual",
+"scores": [
+-2601.8014151084526,
+-148186,
+0,
+0,
+0
+],
+"meta": {
+"name": {
+"ru": "Оптимальный"
+},
+"priority": 260,
+"position": 40,
+"limit": 1,
+"colors": {
+"light": "#0c73fe",
+"dark": "#1781F3"
+}
+}
+}
+],
+"extra_fares": {},
+"position": 1
+},
+{
+"id": "5c1e0d569b8a87486c07d08025c3d047",
+"segments": [
+{
+"flights": [
+0,
+3,
+1
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+},
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": true,
+"tags": [
+"overnight_layover",
+"third_country_transfer"
+]
+}
+],
+"tags": []
+},
+{
+"flights": [
+2,
+4
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "65:4",
+"itinerary_key": "xZnIJf_YeS-ekmbPZdY05g",
+"price": {
+"currency_code": "RUB",
+"value": 127862
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 63931
+},
+"agent_id": 65,
+"flight_terms": {
+"0": {
+"fare_code": "Y_1PC23",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "6020"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"2": {
+"fare_code": "Y_1PC23",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "889"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"3": {
+"fare_code": "Y_1PC23",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5030"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"7": {
+"fare_code": "Y_1PC23",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5195"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"9": {
+"fare_code": "Y_1PC23",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "591"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {
+"weight": true
+},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+},
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 127862
+},
+"weight": 0.06546699759599393,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R0|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "70:1271",
+"itinerary_key": "xZnIJf_YeS-ekmbPZdY05g",
+"price": {
+"currency_code": "RUB",
+"value": 128134
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 64067
+},
+"agent_id": 70,
+"flight_terms": {
+"0": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "6020"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"2": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "889"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"3": {
+"fare_code": "S0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5030"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"7": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5195"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"9": {
+"fare_code": "S0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "591"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"count": true,
+"weight": true,
+"height": true,
+"length": true,
+"width": true,
+"joint_weight": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+},
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 128134
+},
+"weight": 0.09225301806474177,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R0|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+},
+{
+"id": "148:80",
+"itinerary_key": "xZnIJf_YeS-ekmbPZdY05g",
+"price": {
+"currency_code": "RUB",
+"value": 128356
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 64178
+},
+"agent_id": 148,
+"flight_terms": {
+"0": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "6020"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"2": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "889"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"3": {
+"fare_code": "S0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5030"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"7": {
+"fare_code": "V0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5195"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"9": {
+"fare_code": "S0S0ABSD",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "591"
+},
+"baggage": {
+"count": 1,
+"weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+},
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 128356
+},
+"weight": 0.07254004321577356,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P1|H1|L1_1_23|CH1|R0|TBC2",
+"baggage": {
+"count": 1,
+"weight": 23,
+"total_weight": 23
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 8,
+"length": 40,
+"width": 20,
+"height": 55
+},
+"personal_item": {
+"count": 1
+},
+"return_before_flight": {
+"available": false
+},
+"return_after_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": true
+},
+"change_after_flight": {
+"available": true
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+}
+],
+"signature": "5c1e0d569b8a87486c07d08025c3d047",
+"popularity": 0,
+"score": 0.004976696274567125,
+"hashsum": "f8b9ab7666ba3277",
+"tags": [
+"has_night_transfer",
+"has_third_country_transfer",
+"long_layover",
+"night_transfer",
+"overnight_layover"
+],
+"extra_fares": {},
+"position": 6
+},
+{
+"id": "56977cb5bdee16a63ddff680f0a8cf00",
+"segments": [
+{
+"flights": [
+5,
+10
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+},
+{
+"flights": [
+15,
+16
+],
+"transfers": [
+{
+"visa_rules": {
+"required": false
+},
+"recheck_baggage": false,
+"night_transfer": false,
+"tags": [
+"third_country_transfer"
+]
+}
+],
+"tags": []
+}
+],
+"proposals": [
+{
+"id": "65:652",
+"itinerary_key": "Ko1la76MXETSzuXmCOXJuQ",
+"price": {
+"currency_code": "RUB",
+"value": 175129
+},
+"price_per_person": {
+"currency_code": "RUB",
+"value": 87564.5
+},
+"agent_id": 65,
+"flight_terms": {
+"13": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "844"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"25": {
+"fare_code": "Y_0PC",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 36,
+"width": 23,
+"height": 56
+},
+"personal_item": {
+"count": 0
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"68": {
+"fare_code": "Y_1PC25",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "QR",
+"airline_id": "QR",
+"number": "961"
+},
+"baggage": {
+"count": 1,
+"weight": 25
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 37,
+"width": 25,
+"height": 50
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {
+"weight": true
+}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+},
+"69": {
+"fare_code": "Y_1PC25",
+"trip_class": "Y",
+"marketing_carrier_designator": {
+"carrier": "QR",
+"airline_id": "QR",
+"number": "339"
+},
+"baggage": {
+"count": 1,
+"weight": 25
+},
+"total_baggage_count": 2,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 37,
+"width": 25,
+"height": 50
+},
+"personal_item": {
+"count": 1
+},
+"additional_tariff_info": {
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_charter": false,
+"merged_terms_info": {
+"seat_at_registration": {
+"is_from_config": {},
+"mismatch": {}
+},
+"seat_at_purchase": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"return_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_before_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"change_after_flight": {
+"is_from_config": {},
+"mismatch": {}
+},
+"baggage": {
+"is_from_config": {},
+"mismatch": {
+"weight": true
+}
+},
+"handbags": {
+"is_from_config": {
+"height": true,
+"length": true,
+"width": true
+},
+"mismatch": {}
+},
+"personal_item": {
+"is_from_config": {
+"count": true,
+"joint_weight": true
+},
+"mismatch": {}
+}
+}
+}
+},
+"transfer_terms": [
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+],
+[
+{
+"is_virtual_interline": false,
+"tags": []
+}
+]
+],
+"unified_price": {
+"currency_code": "RUB",
+"value": 175129
+},
+"weight": 0.043068112578117546,
+"from_main_airline": false,
+"tags": [
+"from_cache",
+"with_cache"
+],
+"minimum_fare": {
+"code": "",
+"fare_key": "TY|P0|H1|L0|CH0|R0|TBC0",
+"baggage": {
+"count": 0
+},
+"total_baggage_count": 0,
+"handbags": {
+"count": 1,
+"weight": 7,
+"length": 37,
+"width": 25,
+"height": 50
+},
+"personal_item": {
+"count": 0
+},
+"return_before_flight": {
+"available": false
+},
+"change_before_flight": {
+"available": false
+}
+},
+"is_warmcache": false,
+"cashback": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+},
+"cashback_per_person": {
+"localized_amount": {
+"currency_code": "RUB",
+"value": 0
+},
+"available": false
+}
+}
+],
+"signature": "56977cb5bdee16a63ddff680f0a8cf00",
+"popularity": 0,
+"score": 0.00046965136423804236,
+"hashsum": "e91b541fcaa7488d",
+"tags": [
+"has_third_country_transfer",
+"long_layover"
+],
+"extra_fares": {},
+"position": 129
+}
+],
+"flight_legs": [
+{
+"origin": "SVO",
+"destination": "PVG",
+"local_departure_date_time": "2026-09-15 20:25",
+"local_arrival_date_time": "2026-09-16 10:35",
+"departure_unix_timestamp": 1789493100,
+"arrival_unix_timestamp": 1789526100,
+"operating_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "6020"
+},
+"equipment": {
+"code": "332",
+"type": "plane",
+"name": "Airbus A330-200"
+},
+"technical_stops": [],
+"signature": "1789503900:1789554900:SVO:PVG",
+"tags": []
+},
+{
+"origin": "PKX",
+"destination": "DPS",
+"local_departure_date_time": "2026-09-17 15:30",
+"local_arrival_date_time": "2026-09-17 23:30",
+"departure_unix_timestamp": 1789630200,
+"arrival_unix_timestamp": 1789659000,
+"operating_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "889"
+},
+"equipment": {
+"code": "333",
+"type": "plane",
+"name": "Airbus A330-300"
+},
+"technical_stops": [],
+"signature": "1789659000:1789687800:PKX:DPS",
+"tags": []
+},
+{
+"origin": "DPS",
+"destination": "PVG",
+"local_departure_date_time": "2026-12-15 00:55",
+"local_arrival_date_time": "2026-12-15 07:10",
+"departure_unix_timestamp": 1797267300,
+"arrival_unix_timestamp": 1797289800,
+"operating_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5030"
+},
+"equipment": {
+"code": "333",
+"type": "plane",
+"name": "Airbus A330-300"
+},
+"technical_stops": [],
+"signature": "1797296100:1797318600:DPS:PVG",
+"tags": []
+},
+{
+"origin": "PVG",
+"destination": "PKX",
+"local_departure_date_time": "2026-09-16 18:00",
+"local_arrival_date_time": "2026-09-16 20:15",
+"departure_unix_timestamp": 1789552800,
+"arrival_unix_timestamp": 1789560900,
+"operating_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "5195"
+},
+"equipment": {
+"code": "32N",
+"type": "plane",
+"name": "Airbus A320neo"
+},
+"technical_stops": [],
+"signature": "1789581600:1789589700:PVG:PKX",
+"tags": []
+},
+{
+"origin": "PVG",
+"destination": "SVO",
+"local_departure_date_time": "2026-12-15 11:40",
+"local_arrival_date_time": "2026-12-15 17:05",
+"departure_unix_timestamp": 1797306000,
+"arrival_unix_timestamp": 1797343500,
+"operating_carrier_designator": {
+"carrier": "MU",
+"airline_id": "MU",
+"number": "591"
+},
+"equipment": {
+"code": "333",
+"type": "plane",
+"name": "Airbus A330-300"
+},
+"technical_stops": [],
+"signature": "1797334800:1797354300:PVG:SVO",
+"tags": []
+},
+{
+"origin": "SVO",
+"destination": "AUH",
+"local_departure_date_time": "2026-09-15 23:55",
+"local_arrival_date_time": "2026-09-16 06:40",
+"departure_unix_timestamp": 1789505700,
+"arrival_unix_timestamp": 1789526400,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "844"
+},
+"equipment": {
+"code": "77W",
+"type": "plane",
+"name": "Boeing 777-300ER"
+},
+"technical_stops": [],
+"signature": "1789516500:1789540800:SVO:AUH",
+"tags": []
+},
+{
+"origin": "DPS",
+"destination": "AUH",
+"local_departure_date_time": "2026-12-15 01:30",
+"local_arrival_date_time": "2026-12-15 06:25",
+"departure_unix_timestamp": 1797269400,
+"arrival_unix_timestamp": 1797301500,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "479"
+},
+"equipment": {
+"code": "789",
+"type": "plane",
+"name": "Boeing 787-9"
+},
+"technical_stops": [],
+"signature": "1797298200:1797315900:DPS:AUH",
+"tags": []
+},
+{
+"origin": "AUH",
+"destination": "SVO",
+"local_departure_date_time": "2026-12-15 08:25",
+"local_arrival_date_time": "2026-12-15 13:30",
+"departure_unix_timestamp": 1797308700,
+"arrival_unix_timestamp": 1797330600,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "845"
+},
+"equipment": {
+"code": "320",
+"type": "plane",
+"name": "Airbus A320"
+},
+"technical_stops": [],
+"signature": "1797323100:1797341400:AUH:SVO",
+"tags": []
+},
+{
+"origin": "SVO",
+"destination": "AUH",
+"local_departure_date_time": "2026-09-15 12:50",
+"local_arrival_date_time": "2026-09-15 19:35",
+"departure_unix_timestamp": 1789465800,
+"arrival_unix_timestamp": 1789486500,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "842"
+},
+"equipment": {
+"code": "77W",
+"type": "plane",
+"name": "Boeing 777-300ER"
+},
+"technical_stops": [],
+"signature": "1789476600:1789500900:SVO:AUH",
+"tags": []
+},
+{
+"origin": "AUH",
+"destination": "DPS",
+"local_departure_date_time": "2026-09-15 21:50",
+"local_arrival_date_time": "2026-09-16 11:25",
+"departure_unix_timestamp": 1789494600,
+"arrival_unix_timestamp": 1789529100,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"equipment": {
+"code": "789",
+"type": "plane",
+"name": "Boeing 787-9"
+},
+"technical_stops": [],
+"signature": "1789509000:1789557900:AUH:DPS",
+"tags": []
+},
+{
+"origin": "AUH",
+"destination": "DPS",
+"local_departure_date_time": "2026-09-16 21:50",
+"local_arrival_date_time": "2026-09-17 11:25",
+"departure_unix_timestamp": 1789581000,
+"arrival_unix_timestamp": 1789615500,
+"operating_carrier_designator": {
+"carrier": "EY",
+"airline_id": "EY",
+"number": "476"
+},
+"equipment": {
+"code": "789",
+"type": "plane",
+"name": "Boeing 787-9"
+},
+"technical_stops": [],
+"signature": "1789595400:1789644300:AUH:DPS",
+"tags": []
+},
+{
+"origin": "CAN",
+"destination": "DPS",
+"local_departure_date_time": "2026-09-16 18:30",
+"local_arrival_date_time": "2026-09-16 23:40",
+"departure_unix_timestamp": 1789554600,
+"arrival_unix_timestamp": 1789573200,
+"operating_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "625"
+},
+"equipment": {
+"code": "32Q",
+"type": "plane",
+"name": "Airbus A321neo"
+},
+"technical_stops": [],
+"signature": "1789583400:1789602000:CAN:DPS",
+"tags": []
+},
+{
+"origin": "SVO",
+"destination": "CAN",
+"local_departure_date_time": "2026-09-15 21:15",
+"local_arrival_date_time": "2026-09-16 15:00",
+"departure_unix_timestamp": 1789496100,
+"arrival_unix_timestamp": 1789542000,
+"operating_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8004"
+},
+"equipment": {
+"code": "359",
+"type": "plane",
+"name": "Airbus A350-900"
+},
+"technical_stops": [
+{
+"airport_code": "WUH"
+}
+],
+"signature": "1789506900:1789570800:SVO:CAN",
+"tags": []
+},
+{
+"origin": "DPS",
+"destination": "CAN",
+"local_departure_date_time": "2026-12-15 00:40",
+"local_arrival_date_time": "2026-12-15 05:50",
+"departure_unix_timestamp": 1797266400,
+"arrival_unix_timestamp": 1797285000,
+"operating_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "626"
+},
+"equipment": {
+"code": "32Q",
+"type": "plane",
+"name": "Airbus A321neo"
+},
+"technical_stops": [],
+"signature": "1797295200:1797313800:DPS:CAN",
+"tags": []
+},
+{
+"origin": "CAN",
+"destination": "SVO",
+"local_departure_date_time": "2026-12-15 07:40",
+"local_arrival_date_time": "2026-12-15 13:00",
+"departure_unix_timestamp": 1797291600,
+"arrival_unix_timestamp": 1797328800,
+"operating_carrier_designator": {
+"carrier": "CZ",
+"airline_id": "CZ",
+"number": "8027"
+},
+"equipment": {
+"code": "359",
+"type": "plane",
+"name": "Airbus A350-900"
+},
+"technical_stops": [],
+"signature": "1797320400:1797339600:CAN:SVO",
+"tags": []
+},
+{
+"origin": "DPS",
+"destination": "DOH",
+"local_departure_date_time": "2026-12-15 00:35",
+"local_arrival_date_time": "2026-12-15 05:20",
+"departure_unix_timestamp": 1797266100,
+"arrival_unix_timestamp": 1797301200,
+"operating_carrier_designator": {
+"carrier": "QR",
+"airline_id": "QR",
+"number": "961"
+},
+"equipment": {
+"code": "351",
+"type": "plane",
+"name": "Airbus A350-1000"
+},
+"technical_stops": [],
+"signature": "1797294900:1797312000:DPS:DOH",
+"tags": []
+},
+{
+"origin": "DOH",
+"destination": "SVO",
+"local_departure_date_time": "2026-12-15 09:10",
+"local_arrival_date_time": "2026-12-15 14:45",
+"departure_unix_timestamp": 1797315000,
+"arrival_unix_timestamp": 1797335100,
+"operating_carrier_designator": {
+"carrier": "QR",
+"airline_id": "QR",
+"number": "339"
+},
+"equipment": {
+"code": "789",
+"type": "plane",
+"name": "Boeing 787-9"
+},
+"technical_stops": [],
+"signature": "1797325800:1797345900:DOH:SVO",
+"tags": []
+}
+],
+"airlines": {
+"EY": {
+"iata": "EY",
+"is_lowcost": false,
+"name": {
+"ru": {
+"default": "Etihad Airways"
+}
+},
+"site_name": "",
+"brand_color": "C9C8BA"
+},
+"QR": {
+"iata": "QR",
+"is_lowcost": false,
+"name": {
+"ru": {
+"default": "Qatar Airways"
+}
+},
+"alliance_id": 2,
+"site_name": "",
+"brand_color": "64043C"
+},
+"MU": {
+"iata": "MU",
+"is_lowcost": false,
+"name": {
+"ru": {
+"default": "China Eastern"
+}
+},
+"alliance_id": 3,
+"site_name": "",
+"brand_color": "D70819"
+},
+"CZ": {
+"iata": "CZ",
+"is_lowcost": false,
+"name": {
+"ru": {
+"default": "China Southern Airlines"
+}
+},
+"site_name": "",
+"brand_color": "0494D4"
+}
+},
+"meta": {
+"total_tickets_count": 4,
+"cheapest_baggage_ticket_price": 121476
+}
+}
+]

@@ -1,0 +1,23 @@
+[project]
+name = "llm-aviasales-parser"
+version = "0.1.0"
+description = "CLI that finds best flight offers on aviasales.ru (backs the aviasales-flight-search Claude Code plugin)"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.optional-dependencies]
+live = ["curl_cffi>=0.7"]
+
+[project.scripts]
+aviasales-search = "aviasales_search.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["aviasales_search"]

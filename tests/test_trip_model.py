@@ -10,6 +10,7 @@ from aviasales_search.trip_model import (
     DirectionResult,
     FlightLeg,
     Itinerary,
+    StayDays,
     TimeOfDay,
     Ticket,
     parse_config,
@@ -43,6 +44,17 @@ def test_constraints_merge_exclude_transfer_airports_new_field():
     override = Constraints(exclude_transfer_airports={"IST"})
     merged2 = override.merged_over(base)
     assert merged2.exclude_transfer_airports == {"IST"}   # direction wins over base
+
+
+def test_constraints_merge_airlines_direction_inherits_from_global():
+    base = Constraints(airlines=["TK", "EK"])
+    direction = Constraints()  # not set at direction level -> inherit from base
+    merged = direction.merged_over(base)
+    assert merged.airlines == ["TK", "EK"]
+
+    override = Constraints(airlines=["QR"])
+    merged2 = override.merged_over(base)
+    assert merged2.airlines == ["QR"]   # direction wins over base
 
 
 # --------------------------- DirectionResult ---------------------------
@@ -264,6 +276,83 @@ def test_parse_config_date_window_allows_earliest_equals_latest():
         "directions": [_minimal_direction(earliest="2026-09-15", latest="2026-09-15")],
     })
     assert cfg.directions[0].date_window.earliest == cfg.directions[0].date_window.latest
+
+
+# --------------------------- stay_days ---------------------------
+
+def _two_directions(first_extra=None):
+    first = {**_minimal_direction(), **(first_extra or {})}
+    second = _minimal_direction(from_="DPS", to="MOW",
+                                earliest="2026-11-01", latest="2026-11-30")
+    return [first, second]
+
+
+def test_parse_config_stay_days_full_range():
+    cfg = parse_config({
+        "directions": _two_directions({"stay_days": {"min": 30, "max": 50}}),
+    })
+    sd = cfg.directions[0].stay_days
+    assert isinstance(sd, StayDays)
+    assert sd.min_days == 30
+    assert sd.max_days == 50
+    assert cfg.directions[1].stay_days is None
+
+
+def test_parse_config_stay_days_min_only_and_max_only():
+    cfg_min = parse_config({
+        "directions": _two_directions({"stay_days": {"min": 10}}),
+    })
+    assert cfg_min.directions[0].stay_days == StayDays(min_days=10, max_days=None)
+
+    cfg_max = parse_config({
+        "directions": _two_directions({"stay_days": {"max": 14}}),
+    })
+    assert cfg_max.directions[0].stay_days == StayDays(min_days=None, max_days=14)
+
+
+def test_parse_config_stay_days_zero_min_allowed():
+    cfg = parse_config({
+        "directions": _two_directions({"stay_days": {"min": 0, "max": 2}}),
+    })
+    assert cfg.directions[0].stay_days == StayDays(min_days=0, max_days=2)
+
+
+def test_parse_config_stay_days_default_none():
+    cfg = parse_config({"directions": _two_directions()})
+    assert cfg.directions[0].stay_days is None
+
+
+def test_parse_config_rejects_stay_days_negative():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": _two_directions({"stay_days": {"min": -1, "max": 5}}),
+        })
+
+
+def test_parse_config_rejects_stay_days_min_greater_than_max():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": _two_directions({"stay_days": {"min": 50, "max": 30}}),
+        })
+
+
+def test_parse_config_rejects_stay_days_empty_object():
+    with pytest.raises(ConfigError):
+        parse_config({"directions": _two_directions({"stay_days": {}})})
+
+
+def test_parse_config_rejects_stay_days_bool_values():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": _two_directions({"stay_days": {"min": True}}),
+        })
+
+
+def test_parse_config_rejects_stay_days_on_last_direction():
+    directions = _two_directions()
+    directions[1]["stay_days"] = {"min": 5, "max": 10}
+    with pytest.raises(ConfigError):
+        parse_config({"directions": directions})
 
 
 # --------------------------- effective_constraints ---------------------------

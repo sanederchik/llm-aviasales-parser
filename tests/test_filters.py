@@ -115,6 +115,28 @@ def test_passes_direction_none_constraints_allow_everything():
     assert passes_direction(_transfer_direction(hub="AUH", gap_minutes=600), Constraints())
 
 
+def test_passes_direction_airlines_whitelist_all_legs_match():
+    c = Constraints(airlines=["TK", "EK"])
+    dr = DirectionResult(legs=[
+        _leg("MOW", "AUH", dt.datetime(2026, 8, 25, 10), dt.datetime(2026, 8, 25, 13), carrier="TK"),
+        _leg("AUH", "DPS", dt.datetime(2026, 8, 25, 15), dt.datetime(2026, 8, 25, 18), carrier="EK"),
+    ])
+    assert passes_direction(dr, c)
+
+
+def test_passes_direction_airlines_whitelist_one_leg_outside():
+    c = Constraints(airlines=["TK"])
+    dr = DirectionResult(legs=[
+        _leg("MOW", "AUH", dt.datetime(2026, 8, 25, 10), dt.datetime(2026, 8, 25, 13), carrier="TK"),
+        _leg("AUH", "DPS", dt.datetime(2026, 8, 25, 15), dt.datetime(2026, 8, 25, 18), carrier="EK"),
+    ])
+    assert not passes_direction(dr, c)
+
+
+def test_passes_direction_airlines_none_does_not_restrict():
+    assert passes_direction(_direct_direction(), Constraints(airlines=None))
+
+
 def test_passes_direction_empty_time_of_day_allows_all():
     dr = _direct_direction(dep_hour=3)
     assert passes_direction(dr, Constraints(depart_time_of_day=[]))

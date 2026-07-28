@@ -53,12 +53,30 @@ def sample_dates(days: list[dt.date], n: int) -> list[dt.date]:
     return [days[i] for i in idx]
 
 
+def _passes_stay_days(itinerary: Itinerary, combo: tuple[dt.date, ...]) -> bool:
+    """Пребывание в пункте назначения направления i (по датам вылета, обе
+    границы включительно): combo[i+1] - combo[i] должно попасть в
+    [min_days, max_days] его `stay_days`."""
+    for i, direction in enumerate(itinerary.directions[:-1]):
+        stay = direction.stay_days
+        if stay is None:
+            continue
+        gap = (combo[i + 1] - combo[i]).days
+        if stay.min_days is not None and gap < stay.min_days:
+            return False
+        if stay.max_days is not None and gap > stay.max_days:
+            return False
+    return True
+
+
 def date_combinations(itinerary: Itinerary, samples: int) -> list[tuple[dt.date, ...]]:
     """Декартово произведение выборок дат по каждому направлению (по `samples` дат
     на направление), отфильтрованное по монотонности: дата направления i+1 должна
     быть >= даты направления i (маршрут упорядочен во времени). При заданном
     `max_trip_days` дополнительно отбрасываются комбинации, где между датами
-    первого и последнего направлений больше `max_trip_days` дней."""
+    первого и последнего направлений больше `max_trip_days` дней. Направления со
+    `stay_days` дополнительно ограничивают интервал до даты следующего направления
+    (включительно, по датам вылета)."""
     per_direction_dates = [
         sample_dates(direction.date_window.days(), samples) for direction in itinerary.directions
     ]
@@ -70,6 +88,8 @@ def date_combinations(itinerary: Itinerary, samples: int) -> list[tuple[dt.date,
             itinerary.max_trip_days is not None
             and (combo[-1] - combo[0]).days > itinerary.max_trip_days
         ):
+            continue
+        if not _passes_stay_days(itinerary, combo):
             continue
         combos.append(combo)
     return combos

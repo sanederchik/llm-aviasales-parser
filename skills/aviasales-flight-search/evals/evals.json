@@ -1,0 +1,51 @@
+{
+  "skill_name": "aviasales-flight-search",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Найди билеты: Москва → Бали в сентябре 2026, потом Бали → Токио, потом из Токио домой в Москву. Хочу подешевле.",
+      "expected_output": "Ассистент предлагает выбрать режим (упрощённый/глубокий) и задаёт уточняющие вопросы по незаданным содержательным параметрам — в первую очередь про min/max дней пребывания на Бали и в Токио. Поиск не запускается.",
+      "expectations": [
+        "The assistant offered the user a choice between a simplified and a deep search mode before anything else",
+        "The assistant asked the user for the minimum and maximum number of days to stay in Bali",
+        "The assistant asked the user for the minimum and maximum number of days to stay in Tokyo",
+        "The assistant did not run the aviasales-search CLI or any network search",
+        "The assistant did not write a trip.json containing invented stay durations or invented date windows that the user never stated or confirmed"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Упрощённый поиск. Маршрут: Москва → Стамбул 10–15 октября 2026 и обратно 20–25 октября 2026. Летим вдвоём (2 взрослых), эконом, багаж нужен, максимум 1 пересадка, стыковка не дольше 5 часов, длительность перелёта не важна, время суток не важно, аэропорты пересадок любые, авиакомпании любые, вся поездка не дольше 16 дней.",
+      "expected_output": "Содержательные параметры заданы полностью — ассистент не переспрашивает их, а показывает бриф: каждый параметр с пометкой источника (указано/уточнено/дефолт), технические параметры отмечены как дефолт. Запрашивает подтверждение и не запускает CLI до него.",
+      "expectations": [
+        "The assistant did not re-ask any substantive parameter the user already provided (route, dates, passengers, class, baggage, transfers)",
+        "The assistant presented a brief that lists every parameter of the planned search with a source label such as 'указано', 'уточнено' or 'дефолт'",
+        "The brief explicitly shows technical parameters (currency, market, max_requests, date grid density, cache TTL) marked as defaults",
+        "The assistant asked for explicit confirmation to launch the search",
+        "The assistant did not run the aviasales-search CLI before receiving confirmation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Глубокий поиск. Маршрут: Москва → Стамбул 10–15 октября 2026 и обратно 20–25 октября 2026, 2 взрослых, эконом, багаж нужен, максимум 1 пересадка, стыковка до 5 часов, остальные содержательные ограничения не важны.",
+      "expected_output": "Выбран глубокий режим — ассистент дополнительно уточняет технические параметры (сетевой бюджет, плотность сетки дат, TTL кэша, валюту/рынок, число вариантов в отчёте), не запуская поиск.",
+      "expectations": [
+        "The assistant asked about technical parameters: at least network request budget (max_requests) and date grid density (date_samples_per_direction)",
+        "The assistant asked about cache TTL and/or currency/market settings",
+        "The assistant did not silently apply technical defaults without surfacing them to the user",
+        "The assistant did not run the aviasales-search CLI or any network search"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Упрощённый поиск. Москва → Стамбул 10–15 октября 2026 и обратно 20–25 октября 2026, 2 взрослых, эконом, багаж не важен, максимум 1 пересадка, стыковка до 5 часов, длительность и время суток не важны, аэропорты и авиакомпании любые, лимита длительности поездки нет.",
+      "expected_output": "Ответ «багаж не важен» принят как явный: в брифе багаж значится как «без ограничения», вопрос про багаж повторно не задаётся; показан бриф, запрошено подтверждение, CLI не запущен.",
+      "expectations": [
+        "The assistant did not ask the user about baggage again after the user said it does not matter",
+        "The brief lists baggage as unconstrained (e.g. 'без ограничения' / 'не важно') rather than omitting it or inventing a true/false value",
+        "The assistant presented a brief and asked for confirmation before launching",
+        "The assistant did not run the aviasales-search CLI"
+      ]
+    }
+  ]
+}

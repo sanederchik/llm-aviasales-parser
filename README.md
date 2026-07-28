@@ -72,6 +72,7 @@ ln -s ~/.local/share/llm-aviasales-parser/skills/aviasales-flight-search ~/.agen
   "directions": [
     {"from": "MOW", "to": "DPS",
      "date_window": {"earliest": "2026-09-01", "latest": "2026-09-30"},
+     "stay_days": {"min": 30, "max": 50},
      "constraints": {"max_transfers": 1, "baggage_required": true,
                      "depart_time_of_day": ["morning", "afternoon"]}},
     {"from": "DPS", "to": "MOW",
@@ -98,7 +99,13 @@ ln -s ~/.local/share/llm-aviasales-parser/skills/aviasales-flight-search ~/.agen
   `date_window: {earliest, latest}` (`YYYY-MM-DD`). Опционально `constraints`
   — переопределяет `global_constraints` для этого направления (любое
   не-`null` поле в `constraints` направления выигрывает у одноимённого в
-  `global_constraints`, остальные наследуются оттуда).
+  `global_constraints`, остальные наследуются оттуда). Опционально `stay_days: {min, max}` — пребывание в пункте назначения ЭТОГО
+  направления: дата вылета СЛЕДУЮЩЕГО направления должна попасть в
+  `[дата_вылета + min, дата_вылета + max]` (обе границы включительно; хотя бы
+  одно из `min`/`max` обязательно). Считается по датам вылета — погрешность
+  ±1 день от времени прилёта; комбинации дат вне диапазона не пробуются
+  вовсе (экономят сетевой бюджет). На последнем направлении `stay_days`
+  запрещён — после него нет следующего вылета.
 - `global_constraints` — жёсткие фильтры по умолчанию для всех направлений
   (пожелания не оптимизируются — оптимизируется только цена, см. ниже):
   - `max_transfers` — макс. число пересадок на направление;
@@ -117,7 +124,10 @@ ln -s ~/.local/share/llm-aviasales-parser/skills/aviasales-flight-search ~/.agen
     (`DXB,DWC,AUH,SHJ,RKT,DOH,BAH,KWI,RUH,JED,DMM,MCT`);
   - `exclude_transfer_airports` — явный список IATA-кодов аэропортов
     пересадок для исключения (если задан, имеет приоритет над
-    `exclude_gulf_transfers`).
+    `exclude_gulf_transfers`);
+  - `airlines` — белый список IATA-кодов авиакомпаний: каждый рейс
+    направления (включая стыковочные сегменты) должен выполняться
+    перевозчиком из списка.
 - `max_trip_days` (опционально) — макс. число дней между датой вылета ПЕРВОГО
   направления и датой вылета ПОСЛЕДНЕГО (длительность всей поездки);
   комбинации дат с большим интервалом не пробуются вовсе.

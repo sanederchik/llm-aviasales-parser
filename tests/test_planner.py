@@ -21,6 +21,7 @@ from aviasales_search.trip_model import (
     Itinerary,
     Passengers,
     SearchBudget,
+    StayDays,
     Ticket,
 )
 
@@ -63,12 +64,13 @@ def _ticket(directions, price=1000, has_baggage=True):
     return Ticket(price_rub=price, directions=directions, has_baggage=has_baggage, deep_link="x")
 
 
-def _direction_cfg(origin, destination, earliest, latest):
+def _direction_cfg(origin, destination, earliest, latest, stay_days=None):
     return Direction(
         origin=origin, destination=destination,
         date_window=DateWindow(
             earliest=dt.date.fromisoformat(earliest), latest=dt.date.fromisoformat(latest),
         ),
+        stay_days=stay_days,
     )
 
 
@@ -177,6 +179,81 @@ def test_date_combinations_single_direction_is_plain_sample():
     combos = date_combinations(itinerary, samples=4)
     assert len(combos) == 4
     assert all(len(c) == 1 for c in combos)
+
+
+def test_date_combinations_enforces_stay_days_range_inclusive():
+    # Первое направление — фиксированная дата 2026-09-01; окно второго — 20
+    # дней при samples=20, т.е. в выборку попадают ВСЕ даты окна.
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01",
+                       stay_days=StayDays(min_days=10, max_days=15)),
+        _direction_cfg("DPS", "MOW", "2026-09-05", "2026-09-24"),
+    ]
+    combos = date_combinations(_itinerary(directions), samples=20)
+    got = sorted(c[1] for c in combos)
+    assert got[0] == dt.date(2026, 9, 11)   # ровно min=10 дней — включительно
+    assert got[-1] == dt.date(2026, 9, 16)  # ровно max=15 дней — включительно
+    assert len(got) == 6
+
+
+def test_date_combinations_stay_days_min_only():
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01",
+                       stay_days=StayDays(min_days=10)),
+        _direction_cfg("DPS", "MOW", "2026-09-05", "2026-09-24"),
+    ]
+    combos = date_combinations(_itinerary(directions), samples=20)
+    got = sorted(c[1] for c in combos)
+    assert got[0] == dt.date(2026, 9, 11)
+    assert got[-1] == dt.date(2026, 9, 24)  # верхней границы нет — до конца окна
+
+
+def test_date_combinations_stay_days_max_only():
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01",
+                       stay_days=StayDays(max_days=4)),
+        _direction_cfg("DPS", "MOW", "2026-09-05", "2026-09-24"),
+    ]
+    combos = date_combinations(_itinerary(directions), samples=20)
+    assert [c[1] for c in combos] == [dt.date(2026, 9, 5)]  # ровно max=4 дня
+
+
+def test_date_combinations_stay_days_applies_per_intermediate_point():
+    # Три направления: пребывание в DPS 10–15 дней, в NRT ровно 7.
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01",
+                       stay_days=StayDays(min_days=10, max_days=15)),
+        _direction_cfg("DPS", "NRT", "2026-09-05", "2026-09-24",
+                       stay_days=StayDays(min_days=7, max_days=7)),
+        _direction_cfg("NRT", "MOW", "2026-09-12", "2026-10-01"),
+    ]
+    combos = date_combinations(_itinerary(directions), samples=20)
+    assert combos
+    for combo in combos:
+        assert 10 <= (combo[1] - combo[0]).days <= 15
+        assert (combo[2] - combo[1]).days == 7
+
+
+def test_date_combinations_stay_days_combines_with_max_trip_days():
+    # stay_days допускает до 15 дней, но max_trip_days=12 режет хвост.
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01",
+                       stay_days=StayDays(min_days=10, max_days=15)),
+        _direction_cfg("DPS", "MOW", "2026-09-05", "2026-09-24"),
+    ]
+    combos = date_combinations(_itinerary(directions, max_trip_days=12), samples=20)
+    got = sorted(c[1] for c in combos)
+    assert got[0] == dt.date(2026, 9, 11)
+    assert got[-1] == dt.date(2026, 9, 13)  # 12 дней, а не 15
+
+
+def test_date_combinations_without_stay_days_unchanged():
+    directions = [
+        _direction_cfg("MOW", "DPS", "2026-09-01", "2026-09-01"),
+        _direction_cfg("DPS", "MOW", "2026-09-05", "2026-09-24"),
+    ]
+    combos = date_combinations(_itinerary(directions), samples=20)
+    assert len(combos) == 20  # все монотонные комбинации остаются
 
 
 # --------------------------- Itin ---------------------------

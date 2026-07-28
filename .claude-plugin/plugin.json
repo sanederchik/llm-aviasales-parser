@@ -1,6 +1,6 @@
 {
   "name": "aviasales-flight-search",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Находит лучшие авиаперелёты на aviasales.ru (включая сложные мультигород-маршруты) и формирует ранжированный Markdown-отчёт по минимальной суммарной цене в рублях.",
   "author": {
     "name": "Alexander Makarov"

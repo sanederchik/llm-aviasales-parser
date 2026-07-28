@@ -51,6 +51,18 @@ class DateWindow:
         return [self.earliest + dt.timedelta(days=i) for i in range(n + 1)]
 
 
+@dataclass
+class StayDays:
+    """Пребывание в пункте назначения направления: дата вылета СЛЕДУЮЩЕГО
+    направления должна попасть в [дата_вылета + min_days, дата_вылета +
+    max_days] (обе границы включительно). Считается по датам вылета —
+    погрешность ±1 день от времени прилёта принята сознательно (фильтр
+    работает до сетевых запросов, см. спеку 2026-07-28)."""
+
+    min_days: Optional[int] = None
+    max_days: Optional[int] = None
+
+
 # Персидский залив — дефолтный список аэропортов пересадок, исключаемых при
 # `exclude_gulf_transfers: true` (см. Global Constraints рефактора v3.2).
 GULF_AIRPORTS: frozenset[str] = frozenset({
@@ -82,6 +94,7 @@ class Direction:
     origin: str
     destination: str
     date_window: DateWindow
+    stay_days: Optional[StayDays] = None
 
 
 @dataclass
@@ -242,11 +255,36 @@ def _parse_date_window(data: dict, ctx: str) -> DateWindow:
     return dw
 
 
+def _parse_stay_days(data: dict, ctx: str) -> Optional[StayDays]:
+    raw = data.get("stay_days")
+    if raw is None:
+        return None
+
+    def bound(key: str) -> Optional[int]:
+        value = raw.get(key)
+        if value is None:
+            return None
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise ConfigError(
+                f"{ctx}: stay_days.{key} должен быть неотрицательным целым, "
+                f"получено {value!r}"
+            )
+        return value
+
+    min_days, max_days = bound("min"), bound("max")
+    if min_days is None and max_days is None:
+        raise ConfigError(f"{ctx}: stay_days должен содержать 'min' и/или 'max'")
+    if min_days is not None and max_days is not None and min_days > max_days:
+        raise ConfigError(f"{ctx}: stay_days.min > stay_days.max")
+    return StayDays(min_days=min_days, max_days=max_days)
+
+
 def _parse_direction(data: dict, ctx: str) -> tuple[Direction, Constraints]:
     direction = Direction(
         origin=str(_require(data, "from", ctx)),
         destination=str(_require(data, "to", ctx)),
         date_window=_parse_date_window(data, ctx),
+        stay_days=_parse_stay_days(data, ctx),
     )
     return direction, _parse_constraints(data.get("constraints"))
 
@@ -285,6 +323,12 @@ def parse_config(data: dict) -> Itinerary:
     ]
     directions = [direction for direction, _ in parsed]
     per_direction_constraints = [constraints for _, constraints in parsed]
+
+    if directions[-1].stay_days is not None:
+        raise ConfigError(
+            "config: 'stay_days' на последнем направлении не имеет смысла "
+            "(после него нет следующего вылета)"
+        )
 
     return Itinerary(
         currency=data.get("currency", "rub"),

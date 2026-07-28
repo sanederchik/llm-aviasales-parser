@@ -35,6 +35,8 @@ def passes_direction(dr: DirectionResult, c: Constraints) -> bool:
         return False
     if c.exclude_transfer_airports is not None and set(dr.transfer_airports) & c.exclude_transfer_airports:
         return False
+    if c.airlines is not None and any(leg.carrier not in c.airlines for leg in dr.legs):
+        return False
     if not _time_ok(dr.depart.time(), c.depart_time_of_day):
         return False
     if not _time_ok(dr.arrive.time(), c.arrive_time_of_day):

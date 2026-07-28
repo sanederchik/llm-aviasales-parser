@@ -56,18 +56,41 @@ description: >
    код 2 (протух/забанен) — дай пользователю инструкцию из раздела
    «Обновление cURL» ниже и дождись файла.
 
-4. **Запусти CLI.** Python-проект (файл `pyproject.toml` со скриптом
-   `aviasales-search` и пакет `aviasales_search`) лежит в корне плагина —
-   в установленном плагине это `${CLAUDE_PLUGIN_ROOT}`. Рабочие файлы
-   (`trip.json`, `curl.txt`, `report.md`) держи в текущей рабочей директории
-   пользователя, а проект укажи флагом `--project`:
+4. **Проверь окружение и запусти CLI.** Python-проект (файл `pyproject.toml`
+   со скриптом `aviasales-search` и пакет `aviasales_search`) лежит в корне
+   репозитория, т.е. на два уровня выше папки этого скилла.
+
+   **4a. Определи корень проекта (`ROOT`):**
+   - Плагин Claude Code: `ROOT=${CLAUDE_PLUGIN_ROOT}` — Claude Code при
+     загрузке скилла уже подставил сюда реальный путь установленного плагина;
+     если в строке выше стоит конкретный путь, просто используй его.
+   - Codex или другой раннер (строка выше НЕ подставилась — в ней осталось
+     имя переменной CLAUDE_PLUGIN_ROOT в фигурных скобках): возьми папку
+     этого SKILL.md, разреши симлинк и поднимись на два уровня:
+     ```bash
+     ROOT="$(dirname "$(dirname "$(dirname "$(readlink -f <путь к этому SKILL.md>)")")")"
+     ```
+     (скилл лежит в `<repo>/skills/aviasales-flight-search/`, значит `ROOT` —
+     корень репозитория). Проверка: в `$ROOT` есть `pyproject.toml` со
+     скриптом `aviasales-search`.
+
+   **4b. Проверь `uv` (единственная внешняя зависимость):** выполни
+   `uv --version`. Если `uv` нет — скажи пользователю и установи официальным
+   инсталлятором:
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh   # macOS/Linux
    ```
-   uv run --project "${CLAUDE_PLUGIN_ROOT}" aviasales-search --config trip.json --curl curl.txt --out report.md
+   (Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`;
+   после установки бинарь может лежать в `~/.local/bin` — добавь его в `PATH`
+   текущей сессии). Отдельно ставить Python не нужно: `uv run` сам скачает
+   Python 3.14 и зависимости проекта при первом запуске.
+
+   **4c. Запусти поиск.** Рабочие файлы (`trip.json`, `curl.txt`, `report.md`)
+   держи в текущей рабочей директории пользователя, проект укажи флагом
+   `--project`, живой транспорт требует extra `live` (ставит `curl_cffi`):
    ```
-   Если переменная `CLAUDE_PLUGIN_ROOT` не задана (скилл запущен прямо из
-   репозитория, а не из установленного плагина), подставь вместо неё корень
-   репозитория. Требуется установленный `uv` — если его нет, попроси
-   пользователя установить (https://docs.astral.sh/uv/).
+   uv run --project "$ROOT" --extra live aviasales-search --config trip.json --curl curl.txt --out report.md
+   ```
    Полезные флаги: `--top N` (больше вариантов, деф. 10), `--refresh` (искать
    заново, игнорируя кэш), `--max-requests M` (шире перебор дат).
 

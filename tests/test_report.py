@@ -1,6 +1,7 @@
 import datetime as dt
 
 from aviasales_search.report import (
+    LiveReportWriter,
     itinerary_to_offer_dict,
     offers_sorted_desc,
     render_markdown,
@@ -148,3 +149,62 @@ def test_render_markdown_price_delta_shows_more_expensive():
 def test_render_markdown_no_delta_section_without_previous_offers():
     md = render_markdown([_roundtrip_ticket(150)])
     assert "было" not in md
+
+
+# --------------------------- LiveReportWriter ---------------------------
+
+
+def _priced_ticket(price, date_iso="2026-09-15", signature=None):
+    sig = signature if signature is not None else f"sig-{price}"
+    return Ticket(
+        price_rub=price,
+        directions=[_direct_direction("MOW", "DPS", date_iso)],
+        has_baggage=True,
+        deep_link=f"https://www.aviasales.ru/search/x?t=SU_{sig}_{price}",
+        signature=sig,
+    )
+
+
+def test_live_report_writer_writes_report_on_first_update(tmp_path):
+    out = tmp_path / "report.md"
+    writer = LiveReportWriter(out, top_n=10)
+    writer.update([_priced_ticket(1000)])
+    text = out.read_text()
+    assert "Результаты поиска" in text
+    assert "1 000 ₽" in text
+
+
+def test_live_report_writer_skips_rewrite_when_top_unchanged(tmp_path):
+    out = tmp_path / "report.md"
+    writer = LiveReportWriter(out, top_n=10)
+    tickets = [_priced_ticket(1000), _priced_ticket(2000)]
+    writer.update(tickets)
+    out.unlink()  # если топ не изменился, файл не должен появиться снова
+    writer.update(list(tickets))
+    assert not out.exists()
+
+
+def test_live_report_writer_rewrites_when_top_changes(tmp_path):
+    out = tmp_path / "report.md"
+    writer = LiveReportWriter(out, top_n=10)
+    writer.update([_priced_ticket(2000)])
+    writer.update([_priced_ticket(1000), _priced_ticket(2000)])
+    assert "1 000 ₽" in out.read_text()
+
+
+def test_live_report_writer_ignores_changes_beyond_top_n(tmp_path):
+    out = tmp_path / "report.md"
+    writer = LiveReportWriter(out, top_n=2)
+    tickets = [_priced_ticket(1000), _priced_ticket(2000)]
+    writer.update(tickets)
+    out.unlink()
+    writer.update(tickets + [_priced_ticket(3000)])  # меняется только #3
+    assert not out.exists()
+
+
+def test_live_report_writer_leaves_no_temp_files(tmp_path):
+    out = tmp_path / "report.md"
+    writer = LiveReportWriter(out, top_n=10)
+    writer.update([_priced_ticket(1000)])
+    writer.update([_priced_ticket(500), _priced_ticket(1000)])
+    assert [p.name for p in tmp_path.iterdir()] == ["report.md"]

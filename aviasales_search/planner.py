@@ -17,10 +17,11 @@ import datetime as dt
 import itertools
 import logging
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Callable, Optional, Protocol
 
 from .cache import ProbeCache, probe_key
 from .filters import passes_itinerary
+from .progress import ComboEvent, ProgressReporter
 from .trip_model import DirectionResult, FlightLeg, Itinerary, Passengers, Ticket
 
 logger = logging.getLogger(__name__)
@@ -216,6 +217,8 @@ class Planner:
     cache: ProbeCache
     now: dt.datetime
     refresh: bool = False
+    progress: Optional[ProgressReporter] = None
+    live_report: Optional[Callable[[list[Ticket]], None]] = None
 
     def _dated_directions(self, combo: tuple[dt.date, ...]) -> list[tuple[str, str, str]]:
         return [
@@ -255,6 +258,18 @@ class Planner:
         self.cache.put(key, [_ticket_to_dict(t) for t in tickets], self.now)
         return tickets
 
+    def _report(self, index: int, total: int, dated_directions, source: str,
+                found: Optional[int], passed: Optional[int],
+                best_price: Optional[int], running_min: Optional[int],
+                improved: bool) -> None:
+        if self.progress is None:
+            return
+        self.progress.emit(ComboEvent(
+            index=index, total=total, dated_dirs=dated_directions, source=source,
+            found=found, passed=passed, best_price=best_price,
+            running_min=running_min, improved=improved,
+        ))
+
     def _baggage_required(self) -> bool:
         """#6: если хоть одно направление требует багаж — требуем багаж на всём
         билете (тариф единый на весь билет, не на направление)."""
@@ -277,17 +292,32 @@ class Planner:
 
         baggage_required = self._baggage_required()
 
+        if self.progress is not None:
+            self.progress.start(len(combos), budget, self.config.cache.ttl_minutes)
+
         itins: list[Itin] = []
-        for combo in combos:
+        running_min: Optional[int] = None
+        for index, combo in enumerate(combos, start=1):
             dated_directions = self._dated_directions(combo)
             key = self._key(dated_directions, baggage_required)
             tickets = self._cache_lookup(key)
+            source = "кэш"
             if tickets is None:  # cache miss (or refresh) -> needs network
                 if budget <= 0:
-                    continue  # no network budget left; keep scanning other combinations
+                    # no network budget left; keep scanning other combinations
+                    self._report(index, len(combos), dated_directions, "пропуск",
+                                 None, None, None, running_min, False)
+                    continue
                 tickets = self._network_search(dated_directions, key, baggage_required)
                 budget -= 1
+                source = "сеть"
             passing = [t for t in tickets if passes_itinerary(t, self.config)]
+            best = min((t.price_rub for t in passing), default=None)
+            improved = best is not None and (running_min is None or best < running_min)
+            if improved:
+                running_min = best
+            self._report(index, len(combos), dated_directions, source,
+                         len(tickets), len(passing), best, running_min, improved)
             # Заполняем всегда, включая кэш-хиты: старые записи кэша могли быть
             # сохранены без ссылки.
             for t in passing:
@@ -295,6 +325,10 @@ class Planner:
                     dated_directions, self.config.passengers, t,
                 )
             itins.append(Itin(dated_dirs=combo, tickets=passing))
+            if passing and self.live_report is not None:
+                accumulated = [t for itin in itins for t in itin.tickets]
+                accumulated.sort(key=lambda t: t.price_rub)
+                self.live_report(accumulated)
 
         all_tickets = [ticket for itin in itins for ticket in itin.tickets]
         all_tickets.sort(key=lambda t: t.price_rub)

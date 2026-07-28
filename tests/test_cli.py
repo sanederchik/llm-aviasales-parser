@@ -228,3 +228,73 @@ def test_run_second_invocation_reports_price_delta(tmp_path):
     report2 = (tmp_path / "report2.md").read_text()
     assert "Лучшая цена" in report2
     assert "было" in report2
+
+
+def test_run_writes_progress_log_to_run_dir_and_stderr(tmp_path, capsys):
+    parser = build_arg_parser()
+    out = tmp_path / "report.md"
+    args = parser.parse_args([
+        "--config", str(_write_config(tmp_path)),
+        "--curl", str(FIXTURE_CURL),
+        "--out", str(out),
+        "--cache-dir", str(tmp_path / "cache"),
+    ])
+    code = run(
+        args, now=dt.datetime(2026, 7, 26, 12, 0),
+        transport=_mock_transport(), sleep=lambda _: None,
+    )
+    assert code == 0
+
+    runs = list((tmp_path / "cache" / "runs").iterdir())
+    assert len(runs) == 1
+    log_text = (runs[0] / "search.log").read_text()
+    lines = log_text.splitlines()
+    assert lines[0].startswith("Комбинаций дат: 1")
+    assert len(lines) == 2  # заголовок + одна комбинация
+    assert "MOW→DPS 2026-09-15" in lines[1]
+
+    captured = capsys.readouterr()
+    assert lines[0] in captured.err  # прогресс дублируется в stderr
+    assert lines[1] in captured.err
+    assert "Комбинаций дат" not in captured.out  # отчёт в stdout не замусорен
+    assert "Комбинаций дат" not in out.read_text()
+
+
+def test_run_live_report_survives_mid_run_ban(tmp_path):
+    """Два дня в окне -> две комбинации. Первая уходит в сеть штатно, на второй
+    сервер отвечает 403 (бан). run() возвращает 2, но --out уже содержит
+    живой отчёт с билетами первой комбинации."""
+    parser = build_arg_parser()
+    out = tmp_path / "report.md"
+    cfg = _write_config(
+        tmp_path,
+        directions=[
+            {"from": "MOW", "to": "DPS",
+             "date_window": {"earliest": "2026-09-15", "latest": "2026-09-16"}},
+            {"from": "DPS", "to": "MOW",
+             "date_window": {"earliest": "2026-12-15", "latest": "2026-12-15"}},
+        ],
+        search_budget={"max_requests": 5, "date_samples_per_direction": 2},
+    )
+    good = _mock_transport()
+    starts = {"n": 0}
+
+    def transport(method, url, headers, cookies, body):
+        if url == START_URL:
+            starts["n"] += 1
+            if starts["n"] > 1:
+                return Response(status=403, text="banned")
+        return good(method, url, headers, cookies, body)
+
+    args = parser.parse_args([
+        "--config", str(cfg),
+        "--curl", str(FIXTURE_CURL),
+        "--out", str(out),
+        "--cache-dir", str(tmp_path / "cache"),
+    ])
+    code = run(args, now=dt.datetime(2026, 7, 26, 12, 0),
+               transport=transport, sleep=lambda _: None)
+    assert code == 2
+    assert out.exists()
+    assert "Результаты поиска" in out.read_text()
+    assert "₽" in out.read_text()

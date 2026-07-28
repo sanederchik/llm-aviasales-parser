@@ -4,6 +4,9 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from .trip_model import DirectionResult, Ticket
 
 
@@ -113,3 +116,32 @@ def render_markdown(tickets: list[Ticket], top_n: int = 10,
         for i, t in enumerate(shown)
     ]
     return "\n".join(header) + "\n" + "\n".join(blocks)
+
+
+class LiveReportWriter:
+    """«Живой» отчёт: перезаписывает файл отчёта по ходу прогона, но только
+    когда реально изменился топ-N (цена/маршрут/ссылка). Замена файла
+    атомарная (tmp + os.replace), чтобы читатель не увидел полузаписанный
+    отчёт."""
+
+    def __init__(self, out_path, top_n: int,
+                 previous_offers: list[dict] | None = None):
+        self.out_path = Path(out_path)
+        self.top_n = top_n
+        self.previous_offers = previous_offers
+        self._top_signature: list[tuple] | None = None
+
+    def _signature(self, tickets: list[Ticket]) -> list[tuple]:
+        top = sorted(tickets, key=lambda t: t.price_rub)[: self.top_n]
+        return [(t.price_rub, t.signature, t.deep_link) for t in top]
+
+    def update(self, tickets: list[Ticket]) -> None:
+        signature = self._signature(tickets)
+        if signature == self._top_signature:
+            return
+        self._top_signature = signature
+        rendered = render_markdown(tickets, top_n=self.top_n,
+                                   previous_offers=self.previous_offers)
+        tmp = self.out_path.with_name(self.out_path.name + ".tmp")
+        tmp.write_text(rendered, encoding="utf-8")
+        os.replace(tmp, self.out_path)

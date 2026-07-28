@@ -13,9 +13,11 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from .cache import ProbeCache, latest_previous_offers, write_snapshot
+from .cache import ProbeCache, _run_dirname, latest_previous_offers, write_snapshot
 from .curl_auth import ExpiredCurlError, parse_curl_auth
 from .planner import Planner
+from .progress import ProgressLog
+from .report import LiveReportWriter
 from .report import offers_sorted_desc, render_markdown
 from .search_client import SearchClient, Transport, default_transport
 from .trip_model import ConfigError, parse_config
@@ -68,15 +70,27 @@ def run(
     cache_dir = Path(args.cache_dir)
     probe_cache = ProbeCache(cache_dir / "probes.jsonl")
     client = SearchClient(auth=auth, transport=transport, sleep=sleep)
-    planner = Planner(config, client, probe_cache, now=now, refresh=args.refresh)
-
-    try:
-        tickets = planner.plan()
-    except ExpiredCurlError as exc:
-        print(str(exc), file=sys.stderr)
-        return 2
 
     previous = latest_previous_offers(cache_dir, before_ts=now, trip=raw_config)
+
+    # Живой отчёт: файл --out обновляется по ходу прогона при каждом изменении
+    # топ-N — даже при обрыве (бан, Ctrl+C) в нём остаётся лучшее из найденного.
+    live_writer = LiveReportWriter(args.out, top_n=args.top,
+                                   previous_offers=previous) if args.out else None
+
+    # Лог прогресса живёт в папке прогона (тот же timestamp использует
+    # write_snapshot ниже — снапшот и лог лягут рядом) и дублируется в stderr.
+    run_dir = cache_dir / "runs" / _run_dirname(now)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    with (run_dir / "search.log").open("w", encoding="utf-8") as log_file:
+        planner = Planner(config, client, probe_cache, now=now, refresh=args.refresh,
+                          progress=ProgressLog([sys.stderr, log_file]),
+                          live_report=live_writer.update if live_writer else None)
+        try:
+            tickets = planner.plan()
+        except ExpiredCurlError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
     report_md = render_markdown(tickets, top_n=args.top, previous_offers=previous)
     offers = offers_sorted_desc(tickets)
 

@@ -23,8 +23,8 @@ START_URL = "https://tickets-api.aviasales.ru/search/v2/start"
 RESULTS_URL = "https://tickets-api.eu-north-1.aviasales.ru/search/v3.2/results"
 
 # Диапазон человекоподобной паузы между сетевыми вызовами (сек).
-_MIN_DELAY = 3.0
-_MAX_DELAY = 8.0
+_MIN_DELAY = 1.0
+_MAX_DELAY = 3.0
 
 
 @dataclass

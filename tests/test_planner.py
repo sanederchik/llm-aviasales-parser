@@ -531,3 +531,128 @@ def test_plan_populates_per_ticket_share_link(tmp_path):
     assert len(got) == 1
     assert got[0].deep_link.endswith("_86cf37d8f2f037aa6b91238bd3290023_71586")
     assert "?t=EY" in got[0].deep_link
+
+
+# --------------------------- progress reporting ---------------------------
+
+
+class RecordingReporter:
+    """Fake `ProgressReporter`: records start args and emitted events."""
+
+    def __init__(self):
+        self.started_with = None
+        self.events = []
+
+    def start(self, total, budget, ttl_minutes):
+        self.started_with = (total, budget, ttl_minutes)
+
+    def emit(self, event):
+        self.events.append(event)
+
+
+def test_plan_reports_start_and_one_event_per_combo(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-23")]  # 4 days
+    itinerary = _itinerary(directions, max_requests=40, date_samples_per_direction=2)
+    ticket = _ticket([_direct_direction("MOW", "IST", "2026-08-20")], price=500)
+    client = FakeClient({("2026-08-20",): [ticket]})
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    reporter = RecordingReporter()
+    planner = Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0),
+                      progress=reporter)
+    planner.plan()
+
+    assert reporter.started_with == (2, 40, itinerary.cache.ttl_minutes)
+    assert [e.index for e in reporter.events] == [1, 2]
+    assert all(e.total == 2 for e in reporter.events)
+    assert all(e.source == "сеть" for e in reporter.events)
+    first = reporter.events[0]
+    assert first.dated_dirs == [("MOW", "IST", "2026-08-20")]
+    assert (first.found, first.passed, first.best_price) == (1, 1, 500)
+    second = reporter.events[1]
+    assert (second.found, second.passed, second.best_price) == (0, 0, None)
+
+
+def test_plan_reports_cache_source_on_second_run(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-20")]
+    itinerary = _itinerary(directions, date_samples_per_direction=1)
+    client = FakeClient({})
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    now = dt.datetime(2026, 7, 26, 12, 0)
+    Planner(itinerary, client, cache, now=now).plan()
+
+    reporter = RecordingReporter()
+    Planner(itinerary, client, cache, now=now, progress=reporter).plan()
+    assert [e.source for e in reporter.events] == ["кэш"]
+
+
+def test_plan_reports_skipped_combos_when_budget_exhausted(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-23")]  # 4 days
+    itinerary = _itinerary(directions, max_requests=1, date_samples_per_direction=2)
+    client = FakeClient({})
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    reporter = RecordingReporter()
+    Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0),
+            progress=reporter).plan()
+
+    assert [e.source for e in reporter.events] == ["сеть", "пропуск"]
+    skipped = reporter.events[1]
+    assert (skipped.found, skipped.passed, skipped.best_price) == (None, None, None)
+
+
+def test_plan_without_reporter_stays_silent(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-20")]
+    itinerary = _itinerary(directions, date_samples_per_direction=1)
+    client = FakeClient({})
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0)).plan()
+
+
+def test_plan_reports_running_min_and_improvement_flags(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-22")]  # 3 days
+    itinerary = _itinerary(directions, date_samples_per_direction=3)
+    tickets_by_dates = {
+        ("2026-08-20",): [_ticket([_direct_direction("MOW", "IST", "2026-08-20")], price=500)],
+        ("2026-08-22",): [_ticket([_direct_direction("MOW", "IST", "2026-08-22")], price=400)],
+    }
+    client = FakeClient(tickets_by_dates)
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    reporter = RecordingReporter()
+    Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0),
+            progress=reporter).plan()
+
+    assert [e.running_min for e in reporter.events] == [500, 500, 400]
+    assert [e.improved for e in reporter.events] == [True, False, True]
+
+
+def test_plan_skipped_combo_carries_previous_running_min(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-21")]  # 2 days
+    itinerary = _itinerary(directions, max_requests=1, date_samples_per_direction=2)
+    tickets_by_dates = {
+        ("2026-08-20",): [_ticket([_direct_direction("MOW", "IST", "2026-08-20")], price=700)],
+    }
+    client = FakeClient(tickets_by_dates)
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    reporter = RecordingReporter()
+    Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0),
+            progress=reporter).plan()
+
+    assert [e.source for e in reporter.events] == ["сеть", "пропуск"]
+    skipped = reporter.events[1]
+    assert (skipped.running_min, skipped.improved) == (700, False)
+
+
+def test_plan_calls_live_report_with_cumulative_sorted_tickets(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-20", "2026-08-22")]  # 3 days
+    itinerary = _itinerary(directions, date_samples_per_direction=3)
+    tickets_by_dates = {
+        ("2026-08-20",): [_ticket([_direct_direction("MOW", "IST", "2026-08-20")], price=500)],
+        ("2026-08-22",): [_ticket([_direct_direction("MOW", "IST", "2026-08-22")], price=400)],
+    }
+    client = FakeClient(tickets_by_dates)
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    snapshots = []
+    Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0),
+            live_report=lambda tickets: snapshots.append([t.price_rub for t in tickets])).plan()
+
+    # день 2026-08-21 без билетов -> колбэка нет; списки накопительные и по цене
+    assert snapshots == [[500], [400, 500]]

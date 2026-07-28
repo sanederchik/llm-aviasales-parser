@@ -1,8 +1,10 @@
 # llm-aviasales-parser
 
 CLI для поиска лучших авиаперелётов на aviasales.ru. Python-проект живёт в корне
-этого репозитория; Claude Code **плагин** (манифест + скилл) — в
-`.claude/aviasales-flight-search/` (обёртка над этим же CLI, без дублирования кода).
+этого репозитория; манифесты **плагина** — в `.claude-plugin/`
+(`plugin.json` + `marketplace.json`), скилл — в
+`skills/aviasales-flight-search/SKILL.md` (обёртка над этим же CLI, без
+дублирования кода).
 
 Инструмент бьёт напрямую в реальный внутренний API aviasales.ru (v3.2,
 двух-хостовый флоу `start` → `results`): вся поездка (все направления вместе,
@@ -11,6 +13,50 @@ CLI для поиска лучших авиаперелётов на aviasales.r
 (cURL нужен только ради куки/заголовков, см. «Обновление cURL» ниже).
 
 ## Установка
+
+### Требования: только `uv`
+Единственная внешняя зависимость — [uv](https://docs.astral.sh/uv/): он сам
+скачает нужный Python (3.14, см. `.python-version`) и поставит зависимости
+проекта при первом `uv run`/`uv sync`. Отдельно устанавливать Python не нужно.
+
+Проверить и при необходимости установить:
+```bash
+uv --version || curl -LsSf https://astral.sh/uv/install.sh | sh   # macOS/Linux
+# Windows (PowerShell):
+# powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Скилл при запуске сам проверяет наличие `uv` и предлагает установить его этой
+же командой, если он отсутствует.
+
+### Как плагин Claude Code
+В сессии Claude Code:
+```
+/plugin marketplace add sanederchik/llm-aviasales-parser
+/plugin install aviasales-flight-search@aviasales-flight-search
+```
+(первая команда подключает маркетплейс из этого репозитория, вторая ставит
+плагин из него; маркетплейс можно добавить и из терминала:
+`claude plugin marketplace add sanederchik/llm-aviasales-parser`).
+
+После установки скилл активируется автоматически, когда вы просите найти
+билеты («найди билеты Москва → Бали в сентябре…»). Python-окружение при первом
+запуске создаст `uv` — ничего собирать вручную не нужно.
+
+### Как скилл Codex
+Codex ищет скиллы в `~/.agents/skills` (и в `.agents/skills` внутри
+репозитория). Скилл вызывает Python-CLI из корня этого репозитория, поэтому
+клонировать нужно репозиторий целиком, а в папку скиллов положить симлинк
+(копировать одну папку скилла нельзя — CLI останется за бортом):
+```bash
+git clone https://github.com/sanederchik/llm-aviasales-parser.git ~/.local/share/llm-aviasales-parser
+mkdir -p ~/.agents/skills
+ln -s ~/.local/share/llm-aviasales-parser/skills/aviasales-flight-search ~/.agents/skills/aviasales-flight-search
+```
+Перезапустите Codex — скилл подхватится автоматически (список: команда
+`/skills`, явный вызов: `$aviasales-flight-search`).
+
+### Вручную (разработка)
 Из корня репозитория: `uv sync`. Для живых запросов также: `uv sync --extra live`
 (ставит `curl_cffi` для TLS-имперсонации браузера — нужен только боевому
 транспорту, офлайн-тестам не требуется).

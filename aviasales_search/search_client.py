@@ -81,6 +81,13 @@ def build_start_body(
         "citizenship": "RU",
         "currency_code": currency_code,
         "languages": {"ru": 1},
+        # Обязательно для WAF start-хоста (живая проверка 2026-07-28): тело без
+        # experiment_groups получает «access denied» даже с валидными куками и
+        # x-aws-waf-token; достаточно этих двух bot-scoring ключей из браузера.
+        "experiment_groups": {
+            "search-exp-smartCaptcha": "smart-captcha:invisible",
+            "search-exp-botScoring": "v2",
+        },
         "debug": {"override_experiment_groups": {}},
         "brand": "AS",
         "client_features": {
@@ -228,16 +235,35 @@ class SearchClient:
         return tickets
 
 
-def default_transport() -> Transport:
+# Транзиентные сетевые сбои (повисший DNS, обрыв соединения) ретраятся с
+# паузами, а не роняют весь многочасовой перебор (живой сбой 2026-07-29:
+# curl error 28 на одном поллинге убил прогон из 300 комбинаций).
+_TRANSIENT_ATTEMPTS = 3
+_TRANSIENT_BACKOFF_SECONDS = (2.0, 5.0)
+
+
+def default_transport(sleep: Callable[[float], None] = time.sleep) -> Transport:
     """Боевой транспорт с TLS-имперсонацией браузера. `curl_cffi` импортируется
     лениво — для тестов/разработки он не нужен и не тянется в зависимости."""
     from curl_cffi import requests as cffi_requests  # noqa: PLC0415
 
+    transient = (
+        cffi_requests.exceptions.Timeout,
+        cffi_requests.exceptions.ConnectionError,
+    )
+
     def _transport(method, url, headers, cookies, body) -> Response:
-        r = cffi_requests.request(
-            method, url, headers=headers, cookies=cookies,
-            data=body, impersonate="chrome", timeout=30,
-        )
-        return Response(status=r.status_code, text=r.text)
+        for attempt in range(_TRANSIENT_ATTEMPTS):
+            try:
+                r = cffi_requests.request(
+                    method, url, headers=headers, cookies=cookies,
+                    data=body, impersonate="chrome", timeout=30,
+                )
+                return Response(status=r.status_code, text=r.text)
+            except transient:
+                if attempt == _TRANSIENT_ATTEMPTS - 1:
+                    raise
+                sleep(_TRANSIENT_BACKOFF_SECONDS[attempt])
+        raise AssertionError("unreachable")  # цикл всегда возвращает или кидает
 
     return _transport

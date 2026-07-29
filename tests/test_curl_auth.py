@@ -62,6 +62,29 @@ def test_parse_curl_auth_falls_back_to_cookie_header_when_no_dash_b():
     assert auth.cookies == {"auid": "PLACEHOLDER", "marker": "direct"}
 
 
+def test_parse_curl_auth_falls_back_to_x_origin_cookie_when_no_cookies():
+    # Chrome копирует запрос к tickets-api без Cookie-заголовка (куки www-хоста
+    # приложение шлёт в кастомном x-origin-cookie), но AWS WAF требует
+    # настоящую куку aws-waf-token — живая проверка 2026-07-29: без неё START
+    # отвечает 403 "access denied".
+    text = (
+        "curl 'https://x' "
+        "-H 'x-origin-cookie: auid=PLACEHOLDER; aws-waf-token=TOKEN'"
+    )
+    auth = parse_curl_auth(text)
+    assert auth.cookies == {"auid": "PLACEHOLDER", "aws-waf-token": "TOKEN"}
+
+
+def test_parse_curl_auth_prefers_cookie_header_over_x_origin_cookie():
+    text = (
+        "curl 'https://x' "
+        "-H 'cookie: real=1' "
+        "-H 'x-origin-cookie: forwarded=1'"
+    )
+    auth = parse_curl_auth(text)
+    assert auth.cookies == {"real": "1"}
+
+
 def test_parse_curl_auth_truncated_flag_raises_valueerror():
     with pytest.raises(ValueError, match="флага .* нет значения"):
         parse_curl_auth("curl 'https://x' -H")

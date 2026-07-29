@@ -1,13 +1,16 @@
 """Markdown-отчёт по списку `Ticket` (каждый уже — вся поездка целиком, со всеми
-направлениями). Отчёт показывает топ-N самых дешёвых билетов; на билет — таблица
-строк по направлениям (одна строка = один `DirectionResult`)."""
+направлениями). Билеты группируются по комбинации дат вылета (`ComboGroup`);
+отчёт — плоская таблица, одна строка = одна комбинация дат (лучшая цена в
+группе), топ-N комбинаций по цене."""
 
 from __future__ import annotations
 
+import datetime as dt
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
-from .trip_model import DirectionResult, Ticket
+from .trip_model import DirectionResult, Itinerary, Ticket
 
 
 def _spaced(n: int) -> str:
@@ -26,16 +29,44 @@ def _direction_route(d: DirectionResult) -> str:
     return f"{d.legs[0].origin}→{d.legs[-1].destination}"
 
 
-def _direction_transfer_cell(d: DirectionResult) -> str:
-    return ",".join(d.transfer_airports) if d.transfer_airports else "—"
+def combo_dates(t: Ticket) -> tuple[dt.date, ...]:
+    """Первичный ключ строки отчёта: даты вылета каждого плеча. Планнер ищет
+    по точным датам, поэтому кортеж однозначно задаёт комбинацию."""
+    return tuple(d.depart.date() for d in t.directions)
 
 
-def _direction_labels(n: int) -> list[str]:
-    """Подписи направлений: для типового «туда-обратно» — привычные «Туда»/
-    «Обратно» (как в живом эталонном отчёте); иначе — нумерация по порядку."""
-    if n == 2:
-        return ["Туда", "Обратно"]
-    return [f"Направление {i + 1}" for i in range(n)]
+@dataclass
+class ComboGroup:
+    """Все прошедшие фильтры билеты одной комбинации дат (по возрастанию цены)."""
+
+    dates: tuple[dt.date, ...]
+    tickets: list[Ticket]
+
+    @property
+    def best(self) -> Ticket:
+        return self.tickets[0]
+
+    @property
+    def equal_alternatives(self) -> list[Ticket]:
+        return [t for t in self.tickets[1:] if t.price_rub == self.best.price_rub]
+
+    @property
+    def pricier_alternatives(self) -> list[Ticket]:
+        return [t for t in self.tickets[1:] if t.price_rub > self.best.price_rub][:3]
+
+
+def group_tickets_by_combo(tickets: list[Ticket]) -> list[ComboGroup]:
+    """Группирует билеты по комбинациям дат вылета, сортирует внутри группы по
+    цене, затем сортирует сами группы по (цена лучшего, даты)."""
+    by_key: dict[tuple[dt.date, ...], list[Ticket]] = {}
+    for t in tickets:
+        by_key.setdefault(combo_dates(t), []).append(t)
+    groups = [
+        ComboGroup(dates=key, tickets=sorted(ts, key=lambda t: t.price_rub))
+        for key, ts in by_key.items()
+    ]
+    groups.sort(key=lambda g: (g.best.price_rub, g.dates))
+    return groups
 
 
 def itinerary_to_offer_dict(t: Ticket) -> dict:
@@ -65,27 +96,82 @@ def offers_sorted_desc(tickets: list[Ticket]) -> list[dict]:
     return dicts
 
 
-def _render_direction_row(label: str, d: DirectionResult) -> str:
-    date_cell = f"{d.depart:%Y-%m-%d %H:%M} → {d.arrive:%Y-%m-%d %H:%M}"
-    return (
-        f"| {label} | {date_cell} | {_direction_route(d)} | "
-        f"{_direction_transfer_cell(d)} | {_fmt_hm(d.duration_minutes)} | "
-        f"{d.main_carrier_name} |"
-    )
+def direction_labels_for(itinerary: Itinerary) -> list[str]:
+    """Заголовки колонок-плеч из конфига: привычные «Туда»/«Обратно» для
+    туда-обратно, иначе маршрут плеча."""
+    dirs = itinerary.directions
+    if (len(dirs) == 2 and dirs[0].origin == dirs[1].destination
+            and dirs[0].destination == dirs[1].origin):
+        return ["Туда", "Обратно"]
+    return [f"{d.origin}→{d.destination}" for d in dirs]
 
 
-def _render_one(idx: int, t: Ticket, subtitle: str) -> str:
-    lines = [f"## Вариант {idx} — {_fmt_rub(t.price_rub)}{subtitle}", ""]
-    lines.append("| Направление | Дата | Маршрут | Пересадка | В пути | Перевозчик |")
-    lines.append("|---|---|---|---|---|---|")
-    labels = _direction_labels(len(t.directions))
-    for label, d in zip(labels, t.directions):
-        lines.append(_render_direction_row(label, d))
-    lines.append("")
-    if t.deep_link:
-        lines.append(f"[Открыть на aviasales]({t.deep_link})")
-        lines.append("")
-    return "\n".join(lines)
+def _fallback_labels(n: int) -> list[str]:
+    if n == 2:
+        return ["Туда", "Обратно"]
+    return [f"Плечо {i + 1}" for i in range(n)]
+
+
+def _dates_cell(dates: tuple[dt.date, ...]) -> str:
+    return " → ".join(f"{d:%d.%m}" for d in dates)
+
+
+def _leg_cell(d: DirectionResult) -> str:
+    cell = (f"{_direction_route(d)} {d.depart:%H:%M}→{d.arrive:%H:%M}, "
+            f"{_fmt_hm(d.duration_minutes)}, {d.main_carrier_name}")
+    if d.transfer_airports:
+        cell += f", пересадка: {','.join(d.transfer_airports)}"
+    return cell
+
+
+def _link_cell(t: Ticket) -> str:
+    return f"[билет]({t.deep_link})" if t.deep_link else "—"
+
+
+def _alt_link(t: Ticket) -> str:
+    """Ссылка на альтернативу (если есть deep_link)."""
+    return f" [↗]({t.deep_link})" if t.deep_link else ""
+
+
+def _describe_alternative(alt: Ticket, best: Ticket, labels: list[str]) -> str:
+    """Только отличающиеся от лучшего билета плечи, кратко: метка, перевозчик
+    (если другой), время вылета, маршрут (если другие аэропорты)."""
+    parts = []
+    for label, a, b in zip(labels, alt.directions, best.directions):
+        same = (a.depart == b.depart and _direction_route(a) == _direction_route(b)
+                and a.main_carrier_name == b.main_carrier_name)
+        if same:
+            continue
+        bits = [label.lower()]
+        if a.main_carrier_name != b.main_carrier_name:
+            bits.append(a.main_carrier_name)
+        bits.append(f"{a.depart:%H:%M}")
+        if _direction_route(a) != _direction_route(b):
+            bits.append(_direction_route(a))
+        parts.append(" ".join(bits))
+    return ", ".join(parts) if parts else "другой тариф"
+
+
+def _render_comment(group: ComboGroup, labels: list[str]) -> str:
+    """Форматирует комментарий: список альтернатив с ценами и отличиями от best."""
+    best = group.best
+    items = [
+        f"та же цена: {_describe_alternative(t, best, labels)}{_alt_link(t)}"
+        for t in group.equal_alternatives
+    ]
+    items += [
+        f"+{_spaced(t.price_rub - best.price_rub)} ₽: "
+        f"{_describe_alternative(t, best, labels)}{_alt_link(t)}"
+        for t in group.pricier_alternatives
+    ]
+    return "; ".join(items) if items else "—"
+
+
+def _render_row(idx: int, g: ComboGroup, labels: list[str]) -> str:
+    t = g.best
+    legs = " | ".join(_leg_cell(d) for d in t.directions)
+    return (f"| {idx} | {_dates_cell(g.dates)} | {legs} | {_fmt_rub(t.price_rub)} | "
+            f"{_link_cell(t)} | {_render_comment(g, labels)} |")
 
 
 def _delta_header(cheapest_rub: int, previous_offers: list[dict]) -> list[str]:
@@ -99,49 +185,49 @@ def _delta_header(cheapest_rub: int, previous_offers: list[dict]) -> list[str]:
     ]
 
 
-def render_markdown(tickets: list[Ticket], top_n: int = 10,
-                    previous_offers: list[dict] | None = None) -> str:
+def render_markdown(tickets: list[Ticket], top_n: int | None = None,
+                    previous_offers: list[dict] | None = None,
+                    direction_labels: list[str] | None = None) -> str:
     if not tickets:
         return "# Результаты поиска\n\nПодходящих вариантов не найдено.\n"
 
-    cheapest_first = sorted(tickets, key=lambda t: t.price_rub)
-    shown = cheapest_first[:top_n]
+    groups = group_tickets_by_combo(tickets)
+    if top_n is not None:
+        groups = groups[:top_n]
+    labels = direction_labels or _fallback_labels(len(groups[0].best.directions))
 
-    header = ["# Результаты поиска Aviasales", ""]
+    lines = ["# Результаты поиска Aviasales", ""]
     if previous_offers:
-        header += _delta_header(shown[0].price_rub, previous_offers)
-
-    blocks = [
-        _render_one(i + 1, t, subtitle=" (лучший по цене)" if i == 0 else "")
-        for i, t in enumerate(shown)
-    ]
-    return "\n".join(header) + "\n" + "\n".join(blocks)
+        lines += _delta_header(groups[0].best.price_rub, previous_offers)
+    lines.append("| # | Даты | " + " | ".join(labels) + " | Итого | Ссылка | Комментарий |")
+    lines.append("|" + "---|" * (len(labels) + 5))
+    for i, g in enumerate(groups, start=1):
+        lines.append(_render_row(i, g, labels))
+    lines.append("")
+    return "\n".join(lines)
 
 
 class LiveReportWriter:
-    """«Живой» отчёт: перезаписывает файл отчёта по ходу прогона, но только
-    когда реально изменился топ-N (цена/маршрут/ссылка). Замена файла
-    атомарная (tmp + os.replace), чтобы читатель не увидел полузаписанный
-    отчёт."""
+    """«Живой» отчёт: перезаписывает файл по ходу прогона, но только когда
+    отрендеренное содержимое реально изменилось. Замена файла атомарная
+    (tmp + os.replace), чтобы читатель не увидел полузаписанный отчёт."""
 
-    def __init__(self, out_path, top_n: int,
-                 previous_offers: list[dict] | None = None):
+    def __init__(self, out_path, top_n: int | None = None,
+                 previous_offers: list[dict] | None = None,
+                 direction_labels: list[str] | None = None):
         self.out_path = Path(out_path)
         self.top_n = top_n
         self.previous_offers = previous_offers
-        self._top_signature: list[tuple] | None = None
-
-    def _signature(self, tickets: list[Ticket]) -> list[tuple]:
-        top = sorted(tickets, key=lambda t: t.price_rub)[: self.top_n]
-        return [(t.price_rub, t.signature, t.deep_link) for t in top]
+        self.direction_labels = direction_labels
+        self._last_rendered: str | None = None
 
     def update(self, tickets: list[Ticket]) -> None:
-        signature = self._signature(tickets)
-        if signature == self._top_signature:
-            return
-        self._top_signature = signature
         rendered = render_markdown(tickets, top_n=self.top_n,
-                                   previous_offers=self.previous_offers)
+                                   previous_offers=self.previous_offers,
+                                   direction_labels=self.direction_labels)
+        if rendered == self._last_rendered:
+            return
+        self._last_rendered = rendered
         tmp = self.out_path.with_name(self.out_path.name + ".tmp")
         tmp.write_text(rendered, encoding="utf-8")
         os.replace(tmp, self.out_path)

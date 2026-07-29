@@ -107,8 +107,12 @@ def test_build_start_body_shape():
     assert body["debug"] == {"override_experiment_groups": {}}
     assert body["subscription_ticket_signatures"] == []
     assert body["is_internet_restricted"] is False
-    # experiment_groups is explicitly optional per the doc — omitted here.
-    assert "experiment_groups" not in body
+    # Живая проверка 2026-07-28: WAF на start-хосте режет тело БЕЗ
+    # experiment_groups (access denied); достаточно двух bot-scoring ключей.
+    assert body["experiment_groups"] == {
+        "search-exp-smartCaptcha": "smart-captcha:invisible",
+        "search-exp-botScoring": "v2",
+    }
 
 
 def test_build_start_body_accepts_passengers_dataclass():
@@ -347,3 +351,74 @@ def test_default_transport_does_not_import_curl_cffi_at_module_level():
 
     assert "curl_cffi" not in sys.modules
     assert callable(sc.default_transport)
+
+
+def _install_fake_curl_cffi(monkeypatch, request_fn):
+    """Подменяет curl_cffi в sys.modules фейком — тесты офлайн, реальный
+    curl_cffi не требуется. Возвращает namespace с классами исключений."""
+    import sys
+    from types import SimpleNamespace
+
+    class FakeTimeout(Exception):
+        pass
+
+    class FakeConnectionError(Exception):
+        pass
+
+    fake_requests = SimpleNamespace(
+        request=request_fn,
+        exceptions=SimpleNamespace(
+            Timeout=FakeTimeout, ConnectionError=FakeConnectionError,
+        ),
+    )
+    monkeypatch.setitem(
+        sys.modules, "curl_cffi", SimpleNamespace(requests=fake_requests),
+    )
+    monkeypatch.setitem(sys.modules, "curl_cffi.requests", fake_requests)
+    return fake_requests
+
+
+def test_default_transport_retries_transient_curl_errors(monkeypatch):
+    # Живой сбой 2026-07-29: DNS-резолв повис (curl error 28) на одном поллинге
+    # и уронил весь прогон из 300 комбинаций. Транзиентные сетевые ошибки
+    # должны ретраиться с паузой, а не убивать процесс.
+    from types import SimpleNamespace
+
+    attempts = []
+    fake = _install_fake_curl_cffi(monkeypatch, None)
+
+    def flaky_request(method, url, **kwargs):
+        attempts.append(url)
+        if len(attempts) < 3:
+            raise fake.exceptions.Timeout("curl: (28) Resolving timed out")
+        return SimpleNamespace(status_code=200, text="ok")
+
+    fake.request = flaky_request
+    slept = []
+    import aviasales_search.search_client as sc
+
+    transport = sc.default_transport(sleep=slept.append)
+    resp = transport("POST", "https://x", {}, {}, "{}")
+
+    assert resp.status == 200
+    assert resp.text == "ok"
+    assert len(attempts) == 3
+    assert len(slept) == 2  # пауза перед каждым повтором
+
+
+def test_default_transport_raises_after_retry_budget_exhausted(monkeypatch):
+    attempts = []
+    fake = _install_fake_curl_cffi(monkeypatch, None)
+
+    def always_timeout(method, url, **kwargs):
+        attempts.append(url)
+        raise fake.exceptions.Timeout("curl: (28) timed out")
+
+    fake.request = always_timeout
+    import aviasales_search.search_client as sc
+
+    transport = sc.default_transport(sleep=lambda _s: None)
+    with pytest.raises(fake.exceptions.Timeout):
+        transport("POST", "https://x", {}, {}, "{}")
+
+    assert len(attempts) == 3  # бюджет попыток исчерпан, ошибка проброшена

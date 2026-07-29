@@ -501,14 +501,6 @@ def test_search_page_url_passenger_digits_keep_inner_zero():
     ).endswith("IST102")
 
 
-def test_search_page_url_unsupported_shapes_return_empty():
-    three = [("MOW", "IST", "2026-10-01"), ("IST", "TAS", "2026-10-08"),
-             ("TAS", "MOW", "2026-10-20")]
-    assert search_page_url(three, Passengers(adults=1)) == ""
-    open_jaw = [("MOW", "IST", "2026-10-01"), ("IST", "TAS", "2026-10-08")]
-    assert search_page_url(open_jaw, Passengers(adults=1)) == ""
-
-
 def test_plan_populates_deep_link_including_cache_hits(tmp_path):
     directions = [
         _direction_cfg("MOW", "IST", "2026-10-13", "2026-10-13"),
@@ -588,11 +580,81 @@ def test_build_ticket_share_url_without_signature_falls_back_to_search_page():
     assert "?t=" not in url
 
 
-def test_build_ticket_share_url_unsupported_shape_returns_empty():
-    t = _etihad_ticket()
+def test_build_ticket_share_url_three_legs_falls_back_to_base_search_page():
+    # Мультигород больше не "неподдерживаемая форма" (см. search_page_url), но
+    # формат `?t=` для 3+ плеч вживую не проверен — падаем на base search_page_url.
     three = [("MOW", "IST", "2026-10-01"), ("IST", "TAS", "2026-10-08"),
              ("TAS", "MOW", "2026-10-20")]
-    assert build_ticket_share_url(three, Passengers(adults=1), t) == ""
+    ticket = Ticket(
+        price_rub=50000,
+        directions=[
+            DirectionResult(legs=[_leg_local("MOW", "IST", "2026-10-01T10:00",
+                                             "2026-10-01T14:00")]),
+            DirectionResult(legs=[_leg_local("IST", "TAS", "2026-10-08T10:00",
+                                             "2026-10-08T14:00")]),
+            DirectionResult(legs=[_leg_local("TAS", "MOW", "2026-10-20T10:00",
+                                             "2026-10-20T14:00")]),
+        ],
+        has_baggage=False, deep_link="", signature="deadbeef",
+    )
+    url = build_ticket_share_url(three, Passengers(adults=1), ticket)
+    assert url == search_page_url(three, Passengers(adults=1))
+    assert "?t=" not in url
+
+
+def test_search_page_url_multicity_three_legs():
+    url = search_page_url(
+        [("MOW", "IST", "2026-09-13"), ("IST", "DPS", "2026-10-20"),
+         ("DPS", "MOW", "2026-11-15")],
+        Passengers(adults=1),
+    )
+    assert url == "https://www.aviasales.ru/search/MOW1309IST2010DPS1511MOW1"
+
+
+def test_search_page_url_open_jaw_uses_composite_code():
+    url = search_page_url(
+        [("MOW", "IST", "2026-10-01"), ("IST", "TAS", "2026-10-08")],
+        Passengers(adults=1),
+    )
+    assert url == "https://www.aviasales.ru/search/MOW0110IST0810TAS1"
+
+
+def test_build_ticket_share_url_open_jaw_two_legs_falls_back_to_base_search_page():
+    # Open-jaw из 2 плеч (MOW->IST, IST->TAS) — это НЕ настоящий round-trip
+    # (второе плечо не зеркалит первое), поэтому формат `?t=` не верифицирован:
+    # должны получить голую search_page_url без `?t=`, даже с непустой signature.
+    two = [("MOW", "IST", "2026-10-01"), ("IST", "TAS", "2026-10-08")]
+    ticket = Ticket(
+        price_rub=50000,
+        directions=[
+            DirectionResult(legs=[_leg_local("MOW", "IST", "2026-10-01T10:00",
+                                             "2026-10-01T14:00")]),
+            DirectionResult(legs=[_leg_local("IST", "TAS", "2026-10-08T10:00",
+                                             "2026-10-08T14:00")]),
+        ],
+        has_baggage=False, deep_link="", signature="deadbeef",
+    )
+    url = build_ticket_share_url(two, Passengers(adults=1), ticket)
+    assert url == search_page_url(two, Passengers(adults=1))
+    assert "?t=" not in url
+
+
+def test_build_ticket_share_url_multicity_returns_base_without_t():
+    d0 = DirectionResult(legs=[_leg_local("SVO", "IST", "2026-09-13T10:00",
+                                          "2026-09-13T14:00")])
+    d1 = DirectionResult(legs=[_leg_local("IST", "DPS", "2026-10-20T10:00",
+                                          "2026-10-20T23:00")])
+    d2 = DirectionResult(legs=[_leg_local("DPS", "SVO", "2026-11-15T01:00",
+                                          "2026-11-15T13:00")])
+    ticket = Ticket(price_rub=99000, directions=[d0, d1, d2], has_baggage=False,
+                    deep_link="", signature="abc123")
+    url = build_ticket_share_url(
+        [("MOW", "IST", "2026-09-13"), ("IST", "DPS", "2026-10-20"),
+         ("DPS", "MOW", "2026-11-15")],
+        Passengers(adults=1), ticket,
+    )
+    assert url == "https://www.aviasales.ru/search/MOW1309IST2010DPS1511MOW1"
+    assert "?t=" not in url                      # формат ?t= для 3+ плеч не верифицирован
 
 
 def test_plan_populates_per_ticket_share_link(tmp_path):

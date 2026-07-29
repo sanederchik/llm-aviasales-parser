@@ -18,9 +18,19 @@ from .curl_auth import ExpiredCurlError, parse_curl_auth
 from .planner import Planner
 from .progress import ProgressLog
 from .report import LiveReportWriter
-from .report import offers_sorted_desc, render_markdown
+from .report import direction_labels_for, offers_sorted_desc, render_markdown
 from .search_client import SearchClient, Transport, default_transport
-from .trip_model import ConfigError, parse_config
+from .trip_model import ConfigError, Itinerary, parse_config
+
+
+def default_report_path(config: Itinerary) -> Path:
+    """reports/<цепочка-пунктов>-<YYYY-MM>.md в текущей директории поиска."""
+    chain = [config.directions[0].origin] + [d.destination for d in config.directions]
+    if len(chain) > 1 and chain[-1] == chain[0]:
+        chain = chain[:-1]
+    slug = "-".join(p.lower() for p in chain)
+    month = config.directions[0].date_window.earliest.strftime("%Y-%m")
+    return Path("reports") / f"{slug}-{month}.md"
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -30,12 +40,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--config", required=True, help="JSON-конфиг поездки")
     p.add_argument("--curl", required=True, help="Файл с Copy as cURL (авторизация)")
-    p.add_argument("--out", help="Куда записать Markdown-отчёт")
-    p.add_argument("--top", type=int, default=10, help="Сколько вариантов показать")
+    p.add_argument("--out", help="Куда записать Markdown-отчёт "
+                                  "(по умолчанию reports/<маршрут>-<год-месяц>.md)")
+    p.add_argument("--top", type=int, default=None,
+                   help="Сколько комбинаций дат показать (по умолчанию все)")
     p.add_argument("--refresh", action="store_true", help="Игнорировать кэш")
     p.add_argument("--max-requests", type=int, help="Переопределить бюджет запросов")
-    p.add_argument("--cache-dir", default=str(Path.home() / ".aviasales-cache"),
-                   help="Папка кэша")
+    p.add_argument("--cache-dir", default="cache", help="Папка кэша (по умолчанию ./cache)")
     return p
 
 
@@ -61,6 +72,10 @@ def run(
         config.search_budget.max_requests = args.max_requests
         raw_config.setdefault("search_budget", {})["max_requests"] = args.max_requests
 
+    out_path = Path(args.out) if args.out else default_report_path(config)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    labels = direction_labels_for(config)
+
     try:
         auth = parse_curl_auth(Path(args.curl).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
@@ -73,10 +88,11 @@ def run(
 
     previous = latest_previous_offers(cache_dir, before_ts=now, trip=raw_config)
 
-    # Живой отчёт: файл --out обновляется по ходу прогона при каждом изменении
+    # Живой отчёт: файл out_path обновляется по ходу прогона при каждом изменении
     # топ-N — даже при обрыве (бан, Ctrl+C) в нём остаётся лучшее из найденного.
-    live_writer = LiveReportWriter(args.out, top_n=args.top,
-                                   previous_offers=previous) if args.out else None
+    # Включён всегда — не только при явном --out.
+    live_writer = LiveReportWriter(out_path, top_n=args.top,
+                                   previous_offers=previous, direction_labels=labels)
 
     # Лог прогресса живёт в папке прогона (тот же timestamp использует
     # write_snapshot ниже — снапшот и лог лягут рядом) и дублируется в stderr.
@@ -85,19 +101,19 @@ def run(
     with (run_dir / "search.log").open("w", encoding="utf-8") as log_file:
         planner = Planner(config, client, probe_cache, now=now, refresh=args.refresh,
                           progress=ProgressLog([sys.stderr, log_file]),
-                          live_report=live_writer.update if live_writer else None)
+                          live_report=live_writer.update)
         try:
             tickets = planner.plan()
         except ExpiredCurlError as exc:
             print(str(exc), file=sys.stderr)
             return 2
-    report_md = render_markdown(tickets, top_n=args.top, previous_offers=previous)
+    report_md = render_markdown(tickets, top_n=args.top, previous_offers=previous,
+                                direction_labels=labels)
     offers = offers_sorted_desc(tickets)
 
     write_snapshot(cache_dir, now, raw_config, offers, report_md)
 
-    if args.out:
-        Path(args.out).write_text(report_md, encoding="utf-8")
+    out_path.write_text(report_md, encoding="utf-8")
     print(report_md)
     return 0
 

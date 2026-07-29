@@ -95,11 +95,27 @@ def date_combinations(itinerary: Itinerary, samples: int) -> list[tuple[dt.date,
     return combos
 
 
+def _is_true_roundtrip(dirs: list) -> bool:
+    """Форма «настоящий туда-обратно»: ровно 2 плеча, второе — зеркало первого
+    (`B->A` после `A->B`). Open-jaw (второе плечо начинается там же, где
+    закончилось первое, но летит в третий пункт) под это НЕ подпадает.
+    Используется и в `search_page_url` (выбор формата составного кода), и в
+    `build_ticket_share_url` (можно ли эмитить `?t=`) — чтобы обе функции
+    одинаково понимали, что такое «round-trip»."""
+    return (
+        len(dirs) == 2
+        and dirs[1][0] == dirs[0][1]
+        and dirs[1][1] == dirs[0][0]
+    )
+
+
 def search_page_url(dated_directions, passengers: Passengers) -> str:
     """Ссылка на страницу поиска aviasales с точными датами варианта
     (`https://www.aviasales.ru/search/MOW1509DPS15122`). Per-ticket deep link
-    API не отдаёт (см. docs/aviasales-api-v3.2.md); поддерживаются только one-way
-    и туда-обратно — для прочих форм возвращается "" (ссылка не рендерится).
+    API не отдаёт (см. docs/aviasales-api-v3.2.md); поддерживаются one-way,
+    туда-обратно и мультигород/open-jaw (составной код маршрута, см. ветку
+    ниже) — для этих форм ссылка не рендерится, только если распарсить
+    направления не удалось.
     """
     def ddmm(date_iso: str) -> str:
         _, month, day = date_iso.split("-")
@@ -113,15 +129,15 @@ def search_page_url(dated_directions, passengers: Passengers) -> str:
     if len(dirs) == 1:
         (origin, destination, date_iso) = dirs[0]
         route = f"{origin}{ddmm(date_iso)}{destination}"
-    elif (
-        len(dirs) == 2
-        and dirs[1][0] == dirs[0][1]  # обратное направление, не open-jaw
-        and dirs[1][1] == dirs[0][0]
-    ):
+    elif _is_true_roundtrip(dirs):
         (origin, destination, out_iso) = dirs[0]
         route = f"{origin}{ddmm(out_iso)}{destination}{ddmm(dirs[1][2])}"
     else:
-        return ""
+        # Мультигород: конкатенация <ORIGIN><ddmm> по каждому плечу + конечный
+        # пункт. Формат верифицирован вживую (см. шаг 5 плана); при изменении
+        # формата aviasales ссылка деградирует в обычный поиск на сайте.
+        route = "".join(f"{o}{ddmm(date_iso)}" for o, _, date_iso in dirs)
+        route += dirs[-1][1]
     return f"https://www.aviasales.ru/search/{route}{pax}"
 
 
@@ -141,10 +157,17 @@ def build_ticket_share_url(dated_directions, passengers: Passengers, ticket: "Ti
     origin первого лега + destination каждого лега. 6 средних цифр — неидентифи-
     цирующий флаг (сервер матчит по signature+аэропортам), эмитим 000000.
 
-    Без `signature` (напр. запись из старого кэша) или для неподдерживаемой формы
-    маршрута падаем на ссылку-поиск с датами (`search_page_url`)."""
+    Формат `?t=` верифицирован вживую ТОЛЬКО для one-way (1 плечо) и настоящего
+    туда-обратно (2 плеча, второе — зеркало первого, см. `_is_true_roundtrip`).
+    Для любой другой формы — мультигород (3+ плеч) или open-jaw (2 плеча, но
+    НЕ туда-обратно) — `?t=` не эмитим: возвращаем голую `search_page_url`.
+    То же самое, если нет `signature` (напр. запись из старого кэша)."""
     base = search_page_url(dated_directions, passengers)
-    if not base or not ticket.signature:
+    dirs = list(dated_directions)
+    supported_form = len(dirs) == 1 or _is_true_roundtrip(dirs)
+    if not base or not ticket.signature or not supported_form:
+        # Форма проверяется по dated_directions (сетка поиска), а не по
+        # ticket.directions — консистентно с веткой round-trip в search_page_url.
         return base
     carrier = ticket.directions[0].legs[0].carrier if ticket.directions else ""
     segs = []

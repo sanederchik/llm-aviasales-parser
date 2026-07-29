@@ -260,6 +260,44 @@ def test_run_writes_progress_log_to_run_dir_and_stderr(tmp_path, capsys):
     assert "Комбинаций дат" not in out.read_text()
 
 
+def test_run_defaults_write_report_and_cache_into_cwd(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    parser = build_arg_parser()
+    args = parser.parse_args([
+        "--config", str(_write_config(tmp_path)),
+        "--curl", str(FIXTURE_CURL),
+    ])
+    code = run(args, now=dt.datetime(2026, 7, 26, 12, 0),
+               transport=_mock_transport(), sleep=lambda _: None)
+    assert code == 0
+    report = tmp_path / "reports" / "mow-dps-2026-09.md"
+    assert report.exists()
+    assert "Результаты поиска" in report.read_text()
+    assert (tmp_path / "cache" / "probes.jsonl").exists()
+    assert (tmp_path / "cache" / "runs").is_dir()
+
+
+def test_default_report_path_multicity_slug(tmp_path):
+    from aviasales_search.cli import default_report_path
+    from aviasales_search.trip_model import parse_config
+    config = parse_config({
+        "directions": [
+            {"from": "MOW", "to": "IST",
+             "date_window": {"earliest": "2026-09-13", "latest": "2026-09-13"}},
+            {"from": "IST", "to": "DPS",
+             "date_window": {"earliest": "2026-10-20", "latest": "2026-10-20"}},
+            {"from": "DPS", "to": "MOW",
+             "date_window": {"earliest": "2026-11-15", "latest": "2026-11-15"}},
+        ],
+    })
+    assert str(default_report_path(config)) == "reports/mow-ist-dps-2026-09.md"
+
+
+def test_top_default_is_unlimited():
+    args = build_arg_parser().parse_args(["--config", "c", "--curl", "k"])
+    assert args.top is None
+
+
 def test_run_live_report_survives_mid_run_ban(tmp_path):
     """Два дня в окне -> две комбинации. Первая уходит в сеть штатно, на второй
     сервер отвечает 403 (бан). run() возвращает 2, но --out уже содержит

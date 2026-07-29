@@ -76,6 +76,11 @@ def parse_curl_auth(text: str) -> CurlAuth:
     cookies = explicit_cookies
     if not cookies and "cookie" in headers:
         cookies = _parse_cookie_header(headers["cookie"])
+    if not cookies and "x-origin-cookie" in headers:
+        # Chrome копирует запрос к tickets-api без Cookie-заголовка (куки
+        # www-хоста фронт шлёт в кастомном x-origin-cookie), а AWS WAF требует
+        # настоящую куку aws-waf-token — иначе 403 (живая проверка 2026-07-29).
+        cookies = _parse_cookie_header(headers["x-origin-cookie"])
 
     return CurlAuth(headers=headers, cookies=cookies)
 

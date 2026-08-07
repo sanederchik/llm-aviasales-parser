@@ -15,10 +15,12 @@ from __future__ import annotations
 
 import datetime as dt
 import itertools
+import json
 import logging
 from dataclasses import dataclass
 from typing import Callable, Optional, Protocol
 
+from .api_filters import build_filters_state
 from .cache import ProbeCache, probe_key
 from .filters import passes_itinerary
 from .progress import ComboEvent, ProgressReporter
@@ -36,6 +38,8 @@ class _Client(Protocol):
         market_code: str,
         currency_code: str,
         baggage_required: bool = False,
+        min_baggage_weight_kg: Optional[int] = None,
+        filters_state: Optional[dict] = None,
     ) -> list[Ticket]: ...
 
 
@@ -202,6 +206,10 @@ def _ticket_to_dict(t: Ticket) -> dict:
         "has_baggage": t.has_baggage,
         "deep_link": t.deep_link,
         "signature": t.signature,
+        "baggage_weight_kg": t.baggage_weight_kg,
+        "agent_id": t.agent_id,
+        "changeable": t.changeable,
+        "refundable": t.refundable,
         "directions": [
             {
                 "legs": [
@@ -250,6 +258,12 @@ def _ticket_from_dict(d: dict) -> Ticket:
         has_baggage=d["has_baggage"],
         deep_link=d["deep_link"],
         signature=d.get("signature", ""),
+        # Обратная совместимость: старые записи кэша до Task 9 этих полей не
+        # содержат -> None (данные неизвестны, не «пересчитывать заново»).
+        baggage_weight_kg=d.get("baggage_weight_kg"),
+        agent_id=d.get("agent_id"),
+        changeable=d.get("changeable"),
+        refundable=d.get("refundable"),
     )
 
 
@@ -269,12 +283,25 @@ class Planner:
             for direction, date in zip(self.config.directions, combo)
         ]
 
-    def _key(self, dated_directions: list[tuple[str, str, str]], baggage_required: bool) -> str:
+    def _key(
+        self, dated_directions: list[tuple[str, str, str]], baggage_required: bool,
+        min_baggage_weight_kg: Optional[int], filters_state: dict,
+    ) -> str:
         pax = self.config.passengers
-        return probe_key(
+        base = probe_key(
             dated_directions, pax.adults, pax.children, pax.infants, self.config.trip_class,
             baggage_required=baggage_required,
         )
+        # filters_state must be part of the key: probes taken under different
+        # filters (baggage weight, transfer limits, etc.) are not interchangeable
+        # -- reusing them would silently poison the run with stale results.
+        # min_baggage_weight_kg is derived from PER-DIRECTION constraints
+        # (see `_min_baggage_weight`) and is NOT folded into filters_state
+        # (which only reflects global_constraints) -- it must be included
+        # here separately, otherwise two configs differing only by a
+        # per-direction baggage weight threshold would collide on the same
+        # cache key and silently reuse stale probes.
+        return f"{base}:{min_baggage_weight_kg}:{json.dumps(filters_state, sort_keys=True)}"
 
     def _cache_lookup(self, key: str) -> Optional[list[Ticket]]:
         """Cache-only lookup. None means 'nothing usable in cache' (miss, stale, or
@@ -289,6 +316,7 @@ class Planner:
 
     def _network_search(
         self, dated_directions: list[tuple[str, str, str]], key: str, baggage_required: bool,
+        min_baggage_weight_kg: Optional[int], filters_state: dict,
     ) -> list[Ticket]:
         tickets = self.client.search(
             dated_directions,
@@ -297,6 +325,8 @@ class Planner:
             self.config.market_code,
             self.config.currency,
             baggage_required=baggage_required,
+            min_baggage_weight_kg=min_baggage_weight_kg,
+            filters_state=filters_state,
         )
         self.cache.put(key, [_ticket_to_dict(t) for t in tickets], self.now)
         return tickets
@@ -321,6 +351,18 @@ class Planner:
             for i in range(len(self.config.directions))
         )
 
+    def _min_baggage_weight(self) -> Optional[int]:
+        """Максимум `baggage_min_weight_kg` по effective_constraints всех
+        направлений (тариф единый на весь билет — самый строгий порог из
+        направлений и должен применяться ко всему билету); None, если порог
+        нигде не задан."""
+        weights = [
+            self.config.effective_constraints(i).baggage_min_weight_kg
+            for i in range(len(self.config.directions))
+        ]
+        weights = [w for w in weights if w is not None]
+        return max(weights) if weights else None
+
     def plan(self) -> list[Ticket]:
         samples = self.config.search_budget.date_samples_per_direction
         combos = date_combinations(self.config, samples)
@@ -334,6 +376,8 @@ class Planner:
             )
 
         baggage_required = self._baggage_required()
+        min_baggage_weight_kg = self._min_baggage_weight()
+        filters_state = build_filters_state(self.config)
 
         if self.progress is not None:
             self.progress.start(len(combos), budget, self.config.cache.ttl_minutes)
@@ -342,7 +386,9 @@ class Planner:
         running_min: Optional[int] = None
         for index, combo in enumerate(combos, start=1):
             dated_directions = self._dated_directions(combo)
-            key = self._key(dated_directions, baggage_required)
+            key = self._key(
+                dated_directions, baggage_required, min_baggage_weight_kg, filters_state,
+            )
             tickets = self._cache_lookup(key)
             source = "кэш"
             if tickets is None:  # cache miss (or refresh) -> needs network
@@ -351,7 +397,10 @@ class Planner:
                     self._report(index, len(combos), dated_directions, "пропуск",
                                  None, None, None, running_min, False)
                     continue
-                tickets = self._network_search(dated_directions, key, baggage_required)
+                tickets = self._network_search(
+                    dated_directions, key, baggage_required, min_baggage_weight_kg,
+                    filters_state,
+                )
                 budget -= 1
                 source = "сеть"
             passing = [t for t in tickets if passes_itinerary(t, self.config)]

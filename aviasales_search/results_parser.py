@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime as dt
+from typing import Optional
 
 from .trip_model import DirectionResult, FlightLeg, Ticket
 
@@ -45,19 +46,81 @@ def _leg(fl: dict, airlines: dict) -> FlightLeg:
     )
 
 
-def _cheapest_proposal_price(ticket: dict, baggage_required: bool):
+def _proposal_qualifies(
+    p: dict, baggage_required: bool, min_baggage_weight_kg: Optional[int],
+) -> bool:
+    """Проверяет предложение против ограничений по багажу: без ограничений
+    (baggage_required=False и min_baggage_weight_kg=None) — годится любое.
+    Иначе на КАЖДОМ плече (flight_terms) требуется хотя бы 1 место багажа;
+    если вдобавок задан порог веса — на каждом плече ещё и `baggage.weight`
+    >= порога (отсутствие поля weight при заданном пороге дисквалифицирует
+    предложение целиком)."""
+    if not baggage_required and min_baggage_weight_kg is None:
+        return True
+    terms = p.get("flight_terms", {})
+    if not terms:
+        return False
+    for t in terms.values():
+        baggage = t.get("baggage", {})
+        if baggage.get("count", 0) < 1:
+            return False
+        if min_baggage_weight_kg is not None:
+            weight = baggage.get("weight")
+            if weight is None or weight < min_baggage_weight_kg:
+                return False
+    return True
+
+
+def _select_proposal(
+    ticket: dict, baggage_required: bool, min_baggage_weight_kg: Optional[int],
+) -> Optional[dict]:
+    """Выбирает самое дешёвое подходящее предложение билета — «подходящее»
+    учитывает и `baggage_required`, и `min_baggage_weight_kg`
+    (см. `_proposal_qualifies`)."""
     best = None
+    best_price = None
     for p in ticket.get("proposals", []):
-        if baggage_required:
-            terms = p.get("flight_terms", {})
-            if not terms or not all(t.get("baggage", {}).get("count", 0) >= 1 for t in terms.values()):
-                continue
+        if not _proposal_qualifies(p, baggage_required, min_baggage_weight_kg):
+            continue
         val = p.get("price", {}).get("value")
         if val is None:
             continue
-        if best is None or val < best:
-            best = val
+        if best_price is None or val < best_price:
+            best_price = val
+            best = p
     return best
+
+
+def _min_leg_baggage_weight(p: dict) -> Optional[int]:
+    """Минимальный по плечам вес разрешённого багажа выбранного предложения;
+    плечи без багажа (`baggage.count < 1`) или без указанного веса в расчёт
+    не берутся; None — ни на одном плече веса нет (неизвестен/багажа нет)."""
+    weights = [
+        t["baggage"]["weight"]
+        for t in p.get("flight_terms", {}).values()
+        if t.get("baggage", {}).get("count", 0) >= 1
+        and t.get("baggage", {}).get("weight") is not None
+    ]
+    return min(weights) if weights else None
+
+
+def _availability(p: dict, key: str) -> Optional[bool]:
+    """Агрегирует `additional_tariff_info.<key>.available` по всем плечам
+    выбранного предложения: результат True/False только если поле
+    присутствует на КАЖДОМ плече, иначе None (данные неизвестны — напр.
+    у продавца этот блок вообще не пришёл)."""
+    values = []
+    for t in p.get("flight_terms", {}).values():
+        info = t.get("additional_tariff_info")
+        if not isinstance(info, dict) or key not in info:
+            return None
+        avail = info[key].get("available")
+        if avail is None:
+            return None
+        values.append(avail)
+    if not values:
+        return None
+    return all(values)
 
 
 def _has_baggage_option(ticket: dict) -> bool:
@@ -68,14 +131,19 @@ def _has_baggage_option(ticket: dict) -> bool:
     return False
 
 
-def extract_tickets(resp, baggage_required: bool = False) -> list[Ticket]:
+def extract_tickets(
+    resp, baggage_required: bool = False, min_baggage_weight_kg: Optional[int] = None,
+) -> list[Ticket]:
     out: list[Ticket] = []
     for chunk in _chunks(resp):
         flight_legs = chunk.get("flight_legs", [])
         airlines = chunk.get("airlines", {})
         for t in chunk.get("tickets", []):
-            price = _cheapest_proposal_price(t, baggage_required)
-            if price is None:  # e.g. baggage_required and no qualifying fare
+            proposal = _select_proposal(t, baggage_required, min_baggage_weight_kg)
+            if proposal is None:  # напр. нет предложения, подходящего под багаж
+                continue
+            price = proposal.get("price", {}).get("value")
+            if price is None:
                 continue
             directions = []
             for seg in t.get("segments", []):
@@ -89,5 +157,9 @@ def extract_tickets(resp, baggage_required: bool = False) -> list[Ticket]:
                 price_rub=int(round(price)), directions=directions,
                 has_baggage=_has_baggage_option(t), deep_link="",
                 signature=str(t.get("signature") or t.get("id") or ""),
+                baggage_weight_kg=_min_leg_baggage_weight(proposal),
+                agent_id=proposal.get("agent_id"),
+                changeable=_availability(proposal, "change_before_flight"),
+                refundable=_availability(proposal, "return_before_flight"),
             ))
     return out

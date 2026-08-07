@@ -8,6 +8,7 @@ from aviasales_search.results_parser import extract_tickets
 from aviasales_search.trip_model import Ticket
 
 FIXTURE = Path(__file__).parent / "fixtures" / "results_v32_sample.json"
+RAW_FIXTURE = Path(__file__).parent / "fixtures" / "raw_results_sample.json"
 
 
 def _load():
@@ -128,3 +129,74 @@ def test_valid_ticket_report_and_offer_show_airline_name_not_code():
 
     md = render_markdown([valid])
     assert "China Southern Airlines" in md
+
+
+# ------------------------- вес багажа (Task 9) -------------------------
+
+
+def test_extract_reads_baggage_weight():
+    resp = json.loads(RAW_FIXTURE.read_text())
+    tickets = extract_tickets(resp)
+    assert any(t.baggage_weight_kg == 20 for t in tickets)
+
+
+def test_min_weight_drops_light_baggage():
+    resp = json.loads(RAW_FIXTURE.read_text())
+    tickets = extract_tickets(resp, baggage_required=True, min_baggage_weight_kg=20)
+    assert all((t.baggage_weight_kg or 0) >= 20 for t in tickets)
+
+
+def test_extract_reads_agent_id():
+    resp = json.loads(RAW_FIXTURE.read_text())
+    tickets = extract_tickets(resp)
+    assert any(t.agent_id == 183 for t in tickets)
+    assert any(t.agent_id == 70 for t in tickets)
+
+
+def test_changeable_refundable_none_without_additional_tariff_info():
+    # Фикстура (снята вживую) не содержит additional_tariff_info ни на одном
+    # плече ни одного предложения -> оба поля должны остаться None.
+    resp = json.loads(RAW_FIXTURE.read_text())
+    tickets = extract_tickets(resp)
+    assert all(t.changeable is None for t in tickets)
+    assert all(t.refundable is None for t in tickets)
+
+
+def test_changeable_refundable_true_true_on_real_fixture():
+    # results_v32_sample.json (Task 3, снята вживую) РЕАЛЬНО содержит
+    # additional_tariff_info.change_before_flight/return_before_flight на
+    # каждом плече каждого предложения -> проверяем конкретные значения,
+    # не только "не None". "Валидный" билет (160423 RUB, agent_id=148):
+    # на ВСЕХ 4 плечах его самого дешёвого предложения available=True для
+    # обоих полей.
+    tickets = extract_tickets(_load())
+    valid = _find_valid_ticket(tickets)
+    assert valid.agent_id == 148
+    assert valid.changeable is True
+    assert valid.refundable is True
+
+
+def test_changeable_true_refundable_false_on_real_fixture_mixed_ticket():
+    # Билет 127862 RUB (2-transfer, agent_id=65 на самом дешёвом предложении):
+    # на всех плечах change_before_flight.available=True, но
+    # return_before_flight.available=False — разные значения для двух полей,
+    # не тавтология "оба True" или "оба False".
+    tickets = extract_tickets(_load())
+    two_transfer = [t for t in tickets if t.price_rub == 127862]
+    assert len(two_transfer) == 1
+    ticket = two_transfer[0]
+    assert ticket.agent_id == 65
+    assert ticket.changeable is True
+    assert ticket.refundable is False
+
+
+def test_changeable_refundable_false_false_on_real_fixture_gulf_ticket():
+    # Билет 148186 RUB (через AUH, agent_id=65 на самом дешёвом предложении):
+    # на всех плечах ОБА поля available=False.
+    tickets = extract_tickets(_load())
+    gulf = [t for t in tickets if t.price_rub == 148186]
+    assert len(gulf) == 1
+    ticket = gulf[0]
+    assert ticket.agent_id == 65
+    assert ticket.changeable is False
+    assert ticket.refundable is False

@@ -6,9 +6,7 @@
 from __future__ import annotations
 
 import datetime as dt
-import os
 from dataclasses import dataclass
-from pathlib import Path
 
 from .trip_model import DirectionResult, Itinerary, Ticket
 
@@ -124,6 +122,17 @@ def _leg_cell(d: DirectionResult) -> str:
     return cell
 
 
+def _baggage_cell(t: Ticket) -> str:
+    """"да (N кг)" когда вес известен, "да" когда багаж есть но вес неизвестен,
+    иначе "нет". Вес — "оптимистичный" (см. Ticket.baggage_weight_kg): честен,
+    пока has_baggage=True, даже если багаж есть не на всех плечах."""
+    if not t.has_baggage:
+        return "нет"
+    if t.baggage_weight_kg is not None:
+        return f"да ({t.baggage_weight_kg} кг)"
+    return "да"
+
+
 def _link_cell(t: Ticket) -> str:
     return f"[билет]({t.deep_link})" if t.deep_link else "—"
 
@@ -171,7 +180,7 @@ def _render_row(idx: int, g: ComboGroup, labels: list[str]) -> str:
     t = g.best
     legs = " | ".join(_leg_cell(d) for d in t.directions)
     return (f"| {idx} | {_dates_cell(g.dates)} | {legs} | {_fmt_rub(t.price_rub)} | "
-            f"{_link_cell(t)} | {_render_comment(g, labels)} |")
+            f"{_baggage_cell(t)} | {_link_cell(t)} | {_render_comment(g, labels)} |")
 
 
 def _delta_header(cheapest_rub: int, previous_offers: list[dict]) -> list[str]:
@@ -199,35 +208,10 @@ def render_markdown(tickets: list[Ticket], top_n: int | None = None,
     lines = ["# Результаты поиска Aviasales", ""]
     if previous_offers:
         lines += _delta_header(groups[0].best.price_rub, previous_offers)
-    lines.append("| # | Даты | " + " | ".join(labels) + " | Итого | Ссылка | Комментарий |")
-    lines.append("|" + "---|" * (len(labels) + 5))
+    lines.append("| # | Даты | " + " | ".join(labels)
+                 + " | Итого | Багаж | Ссылка | Комментарий |")
+    lines.append("|" + "---|" * (len(labels) + 6))
     for i, g in enumerate(groups, start=1):
         lines.append(_render_row(i, g, labels))
     lines.append("")
     return "\n".join(lines)
-
-
-class LiveReportWriter:
-    """«Живой» отчёт: перезаписывает файл по ходу прогона, но только когда
-    отрендеренное содержимое реально изменилось. Замена файла атомарная
-    (tmp + os.replace), чтобы читатель не увидел полузаписанный отчёт."""
-
-    def __init__(self, out_path, top_n: int | None = None,
-                 previous_offers: list[dict] | None = None,
-                 direction_labels: list[str] | None = None):
-        self.out_path = Path(out_path)
-        self.top_n = top_n
-        self.previous_offers = previous_offers
-        self.direction_labels = direction_labels
-        self._last_rendered: str | None = None
-
-    def update(self, tickets: list[Ticket]) -> None:
-        rendered = render_markdown(tickets, top_n=self.top_n,
-                                   previous_offers=self.previous_offers,
-                                   direction_labels=self.direction_labels)
-        if rendered == self._last_rendered:
-            return
-        self._last_rendered = rendered
-        tmp = self.out_path.with_name(self.out_path.name + ".tmp")
-        tmp.write_text(rendered, encoding="utf-8")
-        os.replace(tmp, self.out_path)

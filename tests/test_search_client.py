@@ -9,6 +9,8 @@ from aviasales_search.search_client import (
     START_URL,
     Response,
     SearchClient,
+    _build_results_body,
+    _expected_tickets_count,
     build_start_body,
 )
 from aviasales_search.trip_model import Passengers
@@ -50,6 +52,19 @@ def _partial_results_text(n: int, total: int | None = None) -> str:
     return json.dumps([chunk])
 
 
+def _empty_results_text_with_meta(total: int, filtered: int | None = None) -> str:
+    """Пустой список билетов с заданным `meta.total_tickets_count` и,
+    опционально, `meta.filtered_tickets_count` — для тестов холодного старта
+    поллинга с активными серверными фильтрами (см. task-13-brief.md)."""
+    chunk = json.loads(FIXTURE.read_text())[0]
+    meta = dict(chunk.get("meta", {}))
+    meta["total_tickets_count"] = total
+    if filtered is not None:
+        meta["filtered_tickets_count"] = filtered
+    chunk = {**chunk, "tickets": [], "meta": meta}
+    return json.dumps([chunk])
+
+
 class RecordingTransport:
     """Мок-транспорт: отдаёт заранее заданные ответы по порядку вызовов,
     записывая (method, url, headers, cookies, body) каждого."""
@@ -67,10 +82,11 @@ def _client(transport, max_poll=6):
     return SearchClient(auth=_auth(), transport=transport, sleep=lambda s: None, max_poll=max_poll)
 
 
-def _search(client, baggage_required=False):
+def _search(client, baggage_required=False, min_baggage_weight_kg=None):
     return client.search(
         dated_directions=DATED_DIRECTIONS, passengers=PASSENGERS, trip_class="Y",
         market_code="ru", currency_code="rub", baggage_required=baggage_required,
+        min_baggage_weight_kg=min_baggage_weight_kg,
     )
 
 
@@ -203,6 +219,30 @@ def test_results_body_references_search_id():
     }
 
 
+def test_results_body_includes_filters_state():
+    body = _build_results_body("sid", {"baggage": True, "baggage_weight": "20"})
+    assert body["filters_state"] == {"baggage": True, "baggage_weight": "20"}
+
+
+def test_results_body_empty_filters_state_by_default():
+    assert _build_results_body("sid", None)["filters_state"] == {}
+
+
+def test_search_passes_filters_state_to_results_call():
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    results_resp = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, results_resp])
+
+    client = _client(transport)
+    client.search(
+        dated_directions=DATED_DIRECTIONS, passengers=PASSENGERS, trip_class="Y",
+        market_code="ru", currency_code="rub", filters_state={"baggage": True},
+    )
+
+    sent_body = json.loads(transport.calls[1][4])
+    assert sent_body["filters_state"] == {"baggage": True}
+
+
 def test_search_raises_expired_curl_on_403_at_start():
     start_resp = Response(status=403, text="")
     transport = RecordingTransport([start_resp])
@@ -321,6 +361,130 @@ def test_search_treats_empty_body_200_as_no_change_without_crashing():
     assert len(transport.calls) == 3
 
 
+# --------------------- task-13: холодный старт с фильтрами ---------------------
+
+
+def test_expected_tickets_count_prefers_filtered_over_total():
+    # Живая проверка 2026-08-07: при активных filters_state сервер отдаёт
+    # meta.filtered_tickets_count (18) отдельно от «сырого» total (444) —
+    # ожидаемое число для стоп-условия должно быть отфильтрованным.
+    payload = [{"meta": {"total_tickets_count": 444, "filtered_tickets_count": 18}}]
+    assert _expected_tickets_count(payload) == 18
+
+
+def test_expected_tickets_count_falls_back_to_total_without_filter():
+    payload = [{"meta": {"total_tickets_count": 444}}]
+    assert _expected_tickets_count(payload) == 444
+
+
+def test_search_keeps_polling_past_max_poll_while_index_still_filling_and_empty():
+    # Живой баг 2026-08-07: с активными filters_state индекс наполняется
+    # асинхронно между поллами (total_tickets_count растёт 444→846), а первые
+    # поллы пусты. max_poll=4 раньше исчерпывался бы без единого билета —
+    # фикс должен продолжать поллинг сверх max_poll (до max_poll_cold), пока
+    # результат пуст И total растёт.
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    empty1 = Response(status=200, text=_empty_results_text_with_meta(total=444))
+    empty2 = Response(status=200, text=_empty_results_text_with_meta(total=520))
+    empty3 = Response(status=200, text=_empty_results_text_with_meta(total=680))
+    empty4 = Response(status=200, text=_empty_results_text_with_meta(total=846))
+    full = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, empty1, empty2, empty3, empty4, full])
+
+    tickets = _search(_client(transport, max_poll=4))
+
+    assert len(tickets) == 4
+    # START + 4 пустых (исчерпали бы старый max_poll=4) + 1 с билетами = 6.
+    assert len(transport.calls) == 1 + 5
+
+
+def test_search_stops_early_when_filtered_count_zero_and_total_stagnant_twice():
+    # Честный пустой результат: filtered_tickets_count == 0 и total не растёт
+    # два полла подряд — выходим раньше max_poll_cold=15 (и раньше max_poll).
+    # total=444 (>0) намеренно: индекс уже наполнен, ни один билет реально
+    # не прошёл фильтр — отличать от «поиск ещё не начал наполняться»
+    # (total==0), см. test_search_keeps_polling_when_search_has_not_started_yet.
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    empty1 = Response(status=200, text=_empty_results_text_with_meta(total=444, filtered=0))
+    empty2 = Response(status=200, text=_empty_results_text_with_meta(total=444, filtered=0))
+    never_reached = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, empty1, empty2, never_reached])
+
+    tickets = _search(_client(transport, max_poll=15))
+
+    assert tickets == []
+    assert len(transport.calls) == 1 + 2
+
+
+def test_search_keeps_polling_when_search_has_not_started_yet():
+    # Живой холодный прогон 2026-08-07: в первые секунды после START сервер
+    # отдаёт filtered_tickets_count=0 И total_tickets_count=0 — поиск ещё не
+    # начал наполняться (не «ни один билет не прошёл фильтр»; та же
+    # комбинация тёплой отдаёт 34 билета первым же поллом). Это НЕ должно
+    # засчитываться как стагнация: поллим дальше в пределах холодного
+    # бюджета (max_poll_cold), как при растущем total.
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    empty1 = Response(status=200, text=_empty_results_text_with_meta(total=0, filtered=0))
+    empty2 = Response(status=200, text=_empty_results_text_with_meta(total=0, filtered=0))
+    empty3 = Response(status=200, text=_empty_results_text_with_meta(total=0, filtered=0))
+    empty4 = Response(status=200, text=_empty_results_text_with_meta(total=0, filtered=0))
+    full = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, empty1, empty2, empty3, empty4, full])
+
+    # max_poll=4 нарочно мал: без фикса либо исчерпался бы пустым (старая
+    # ветка «до max_poll»), либо — с прошлым фиксом раннего выхода — оборвал
+    # бы поиск на 2-м полле (стагнация filtered==0 засчиталась бы при
+    # total==0). Ни то ни другое: поллинг продолжается до `full`.
+    tickets = _search(_client(transport, max_poll=4))
+
+    assert len(tickets) == 4
+    assert len(transport.calls) == 1 + 5
+
+
+def test_search_stagnant_filtered_streak_resets_on_nonzero_filtered_poll():
+    # Ревью-находка: счётчик "два filtered==0 ПОДРЯД" не должен переживать
+    # разрыв серии. полл1: filtered=0, total=444 (стагнация=1). полл2:
+    # список билетов всё ещё пуст (тикеты ещё не подъехали), но
+    # filtered_tickets_count=3 и total не вырос — серия разорвана. полл3:
+    # снова filtered=0, total=444 — это ПЕРВЫЙ подряд нулевой после разрыва,
+    # а не второй, поэтому досрочный пустой выход НЕ должен случиться.
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    empty1 = Response(status=200, text=_empty_results_text_with_meta(total=444, filtered=0))
+    mid = Response(status=200, text=_empty_results_text_with_meta(total=444, filtered=3))
+    empty2 = Response(status=200, text=_empty_results_text_with_meta(total=444, filtered=0))
+    full = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, empty1, mid, empty2, full])
+
+    tickets = _search(_client(transport, max_poll=15))
+
+    # Без фикса эта последовательность досрочно вышла бы пустой на empty2
+    # (стагнация ошибочно накопилась бы до 2). С фиксом поллинг продолжается
+    # до `full`.
+    assert len(tickets) == 4
+    assert len(transport.calls) == 1 + 4
+
+
+def test_search_delays_at_least_two_seconds_after_empty_poll():
+    # Пауза перед поллом, следующим за пустым ответом, — не меньше 2.0 с,
+    # даже если конфиг задаёт меньшую дефолтную паузу.
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    empty1 = Response(status=200, text=_empty_results_text_with_meta(total=444))
+    full = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, empty1, full])
+    sleeps: list[float] = []
+    client = SearchClient(auth=_auth(), transport=transport, sleep=sleeps.append,
+                          max_poll=6, delay_min=0.1, delay_max=0.1)
+
+    _search(client)
+
+    # [пауза перед START, пауза перед пустым поллом (без флора),
+    #  пауза перед следующим поллом (флор 2.0 — предыдущий ответ был пуст)]
+    assert len(sleeps) == 3
+    assert sleeps[0] == pytest.approx(0.1)
+    assert sleeps[1] == pytest.approx(0.1)
+    assert sleeps[2] >= 2.0
+
+
 def test_search_applies_baggage_required_filter():
     start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
     # baggage_required=True filters the fixture's 4 raw tickets down to 2 —
@@ -336,6 +500,24 @@ def test_search_applies_baggage_required_filter():
     assert len(tickets) == 2  # only baggage-inclusive tickets survive (see test_results_parser)
     assert all(t.has_baggage for t in tickets)
     assert len(transport.calls) == 3  # START + 2 identical polls -> stabilized
+
+
+def test_search_applies_min_baggage_weight_filter():
+    # min_baggage_weight_kg=30 requires every leg's proposal to allow >=30kg;
+    # the fixture's max is 25kg -> nothing qualifies (see test_results_parser
+    # fixture weights). Threading verified end-to-end through SearchClient:
+    # every poll of the (otherwise non-empty) fixture yields zero surviving
+    # tickets, so we exhaust max_poll and end up with [].
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    results_resp = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp] + [results_resp] * 3)
+
+    tickets = _search(
+        _client(transport, max_poll=3), baggage_required=True, min_baggage_weight_kg=30,
+    )
+
+    assert tickets == []
+    assert len(transport.calls) == 1 + 3  # exhausted max_poll, no stabilization
 
 
 def test_response_json_parses_text():
@@ -422,3 +604,28 @@ def test_default_transport_raises_after_retry_budget_exhausted(monkeypatch):
         transport("POST", "https://x", {}, {}, "{}")
 
     assert len(attempts) == 3  # бюджет попыток исчерпан, ошибка проброшена
+
+
+# --------------------------- настраиваемые паузы ---------------------------
+
+
+def test_search_client_uses_configured_fixed_delay():
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    results_resp = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, results_resp])
+    sleeps = []
+    client = SearchClient(auth=_auth(), transport=transport, sleep=sleeps.append,
+                          max_poll=6, delay_min=7.0, delay_max=7.0)
+    _search(client)
+    assert sleeps == [7.0, 7.0]
+
+
+def test_search_client_delays_stay_within_configured_range():
+    start_resp = Response(status=200, text=json.dumps({"search_id": "sid"}))
+    results_resp = Response(status=200, text=_full_results_text())
+    transport = RecordingTransport([start_resp, results_resp])
+    sleeps = []
+    client = SearchClient(auth=_auth(), transport=transport, sleep=sleeps.append,
+                          max_poll=6, delay_min=2.0, delay_max=4.0)
+    _search(client)
+    assert sleeps and all(2.0 <= s <= 4.0 for s in sleeps)

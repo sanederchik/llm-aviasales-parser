@@ -54,6 +54,70 @@ def _ticket(directions, has_baggage=True, price=1000):
     return Ticket(price_rub=price, directions=directions, has_baggage=has_baggage, deep_link="x")
 
 
+def make_ticket(
+    *,
+    legs=None,
+    depart=None,
+    first_leg_origin=None,
+    destination="IST",
+    price_rub=1000,
+    has_baggage=True,
+    baggage_weight_kg=None,
+    agent_id=None,
+    changeable=None,
+    refundable=None,
+):
+    """Фабрика билетов для тестов новых клиентских проверок (задачи 10/10b):
+    один DirectionResult, опционально многоплечий (legs=[(origin, dest), ...]).
+    Соседние плечи разнесены по времени (гэп 2ч), так что при разных
+    origin/dest соседних плеч срабатывает проверка no_airport_change."""
+    dep = depart or dt.datetime(2026, 9, 11, 10, 0)
+    if legs is None:
+        legs = [(first_leg_origin or "MOW", destination)]
+    built_legs = []
+    cur_dep = dep
+    for origin, dest in legs:
+        arr = cur_dep + dt.timedelta(hours=3)
+        built_legs.append(_leg(origin, dest, cur_dep, arr))
+        cur_dep = arr + dt.timedelta(hours=2)
+    return Ticket(
+        price_rub=price_rub,
+        directions=[DirectionResult(legs=built_legs)],
+        has_baggage=has_baggage,
+        deep_link="x",
+        baggage_weight_kg=baggage_weight_kg,
+        agent_id=agent_id,
+        changeable=changeable,
+        refundable=refundable,
+    )
+
+
+def make_itinerary_with_airports(direction_index, from_airports=None, to_airports=None, n=1):
+    """Локальный хелпер (обычная функция, не pytest-фикстура): Itinerary, у
+    которого direction[direction_index] несёт заданные from_airports/
+    to_airports (задача 10b, проверка направляется через passes_itinerary)."""
+    dw = DateWindow(earliest=dt.date(2026, 9, 11), latest=dt.date(2026, 9, 11))
+    directions = [
+        Direction(
+            origin="MOW", destination="IST", date_window=dw,
+            from_airports=from_airports if i == direction_index else None,
+            to_airports=to_airports if i == direction_index else None,
+        )
+        for i in range(n)
+    ]
+    return Itinerary(
+        currency="rub",
+        market_code="ru",
+        trip_class="Y",
+        passengers=Passengers(adults=1),
+        directions=directions,
+        global_constraints=Constraints(),
+        per_direction_constraints=[Constraints() for _ in range(n)],
+        search_budget=SearchBudget(),
+        cache=CacheCfg(),
+    )
+
+
 def _itinerary(global_c=None, per_direction_cs=None, n=2):
     dw = DateWindow(earliest=dt.date(2026, 8, 25), latest=dt.date(2026, 8, 25))
     directions = [Direction(origin="MOW", destination="IST", date_window=dw) for _ in range(n)]
@@ -275,6 +339,29 @@ def test_passes_itinerary_baggage_judged_by_global_only():
     assert passes_itinerary(ticket_with_bag, itinerary)
 
 
+def test_passes_itinerary_uses_max_per_direction_baggage_weight_over_directions():
+    """Regression (final review, finding 1): baggage_min_weight_kg set ONLY on
+    one direction (global_constraints carries no weight threshold at all) must
+    still be enforced at the ticket level by passes_itinerary -- the fare is
+    one for the whole ticket, so the strictest per-direction threshold must
+    apply everywhere, same semantics as planner._min_baggage_weight."""
+    itinerary = _itinerary(
+        global_c=Constraints(),
+        per_direction_cs=[Constraints(), Constraints(baggage_min_weight_kg=20)],
+    )
+    light_ticket = _ticket(
+        [_direct_direction(), _direct_direction()], has_baggage=True,
+    )
+    light_ticket.baggage_weight_kg = 10
+    assert not passes_itinerary(light_ticket, itinerary)
+
+    heavy_ticket = _ticket(
+        [_direct_direction(), _direct_direction()], has_baggage=True,
+    )
+    heavy_ticket.baggage_weight_kg = 25
+    assert passes_itinerary(heavy_ticket, itinerary)
+
+
 def test_passes_itinerary_depart_time_of_day_uses_first_direction_effective_constraints():
     itinerary = _itinerary(
         per_direction_cs=[
@@ -346,3 +433,96 @@ def test_apply_filters_preserves_order_and_filters():
 def test_apply_filters_none_constraints_returns_all():
     tickets = [_ticket([_direct_direction()]), _ticket([_transfer_direction(hub="AUH")])]
     assert apply_filters(tickets, Constraints()) == tickets
+
+
+# --------------------------- Task 10: вес багажа ---------------------------
+
+
+def test_min_baggage_weight_filters_out_light_ticket():
+    t = make_ticket(baggage_weight_kg=10)
+    c = Constraints(baggage_required=True, baggage_min_weight_kg=20)
+    assert passes(t, c) is False
+
+
+def test_unknown_weight_fails_when_threshold_set():
+    t = make_ticket(baggage_weight_kg=None)
+    c = Constraints(baggage_min_weight_kg=20)
+    assert passes(t, c) is False
+
+
+def test_sufficient_baggage_weight_passes():
+    t = make_ticket(baggage_weight_kg=25)
+    c = Constraints(baggage_required=True, baggage_min_weight_kg=20)
+    assert passes(t, c) is True
+
+
+# --------------------------- Task 10b: остальные новые поля ---------------------------
+
+
+def test_max_price_filters_out_expensive():
+    t = make_ticket(price_rub=300000)
+    assert passes(t, Constraints(max_price=250000)) is False
+
+
+def test_max_price_boundary_inclusive():
+    t = make_ticket(price_rub=250000)
+    assert passes(t, Constraints(max_price=250000)) is True
+
+
+def test_exact_depart_time_range():
+    t = make_ticket(depart=dt.datetime(2026, 9, 11, 5, 30))
+    c = Constraints(depart_time=(dt.time(6, 0), dt.time(12, 0)))
+    assert passes(t, c) is False
+
+
+def test_exact_depart_time_range_inside_passes():
+    t = make_ticket(depart=dt.datetime(2026, 9, 11, 8, 0))
+    c = Constraints(depart_time=(dt.time(6, 0), dt.time(12, 0)))
+    assert passes(t, c) is True
+
+
+def test_no_airport_change_rejects_cross_airport_transfer():
+    t = make_ticket(legs=[("ALA", "DMK"), ("BKK", "DPS")])   # прилёт DMK, вылет BKK
+    assert passes(t, Constraints(no_airport_change=True)) is False
+
+
+def test_no_airport_change_allows_same_airport_transfer():
+    t = make_ticket(legs=[("ALA", "DMK"), ("DMK", "DPS")])
+    assert passes(t, Constraints(no_airport_change=True)) is True
+
+
+def test_agents_whitelist():
+    t = make_ticket(agent_id=183)
+    assert passes(t, Constraints(agents=["kupibilet|70"])) is False
+    assert passes(t, Constraints(agents=["aviakassa|183"])) is True
+
+
+def test_agents_unknown_agent_id_fails_when_filter_set():
+    t = make_ticket(agent_id=None)
+    assert passes(t, Constraints(agents=["aviakassa|183"])) is False
+
+
+def test_changeable_only():
+    assert passes(make_ticket(changeable=False), Constraints(changeable_only=True)) is False
+    assert passes(make_ticket(changeable=None), Constraints(changeable_only=True)) is False
+    assert passes(make_ticket(changeable=True), Constraints(changeable_only=True)) is True
+
+
+def test_refundable_only():
+    t = make_ticket(refundable=False)
+    assert passes(t, Constraints(refundable_only=True)) is False
+
+
+def test_direction_airports_checked_in_itinerary():
+    # itinerary с directions[0].from_airports=["DME"]; билет вылетает из VKO → False
+    itinerary = make_itinerary_with_airports(0, from_airports=["DME"])
+    t = make_ticket(first_leg_origin="VKO")
+    assert passes_itinerary(t, itinerary) is False
+
+
+def test_direction_to_airports_checked_in_itinerary():
+    itinerary = make_itinerary_with_airports(0, to_airports=["SVO"])
+    t = make_ticket(destination="DME")
+    assert passes_itinerary(t, itinerary) is False
+    t_ok = make_ticket(destination="SVO")
+    assert passes_itinerary(t_ok, itinerary) is True

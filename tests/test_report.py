@@ -2,7 +2,6 @@ import datetime as dt
 
 from aviasales_search.report import (
     ComboGroup,
-    LiveReportWriter,
     combo_dates,
     group_tickets_by_combo,
     itinerary_to_offer_dict,
@@ -47,16 +46,18 @@ def _transfer_direction(origin, hub, destination, date_iso, gap_minutes=120,
     ])
 
 
-def _ticket(directions, price=1000, has_baggage=True, deep_link="https://aviasales.ru/x"):
+def _ticket(directions, price=1000, has_baggage=True, deep_link="https://aviasales.ru/x",
+           baggage_weight_kg=None):
     return Ticket(price_rub=price, directions=directions, has_baggage=has_baggage,
-                 deep_link=deep_link)
+                 deep_link=deep_link, baggage_weight_kg=baggage_weight_kg)
 
 
-def _roundtrip_ticket(price, date_out="2026-09-15", date_back="2026-12-15"):
+def _roundtrip_ticket(price, date_out="2026-09-15", date_back="2026-12-15",
+                      baggage_weight_kg=None):
     return _ticket([
         _direct_direction("MOW", "DPS", date_out),
         _direct_direction("DPS", "MOW", date_back),
-    ], price=price)
+    ], price=price, baggage_weight_kg=baggage_weight_kg)
 
 
 # --------------------------- itinerary_to_offer_dict ---------------------------
@@ -120,9 +121,11 @@ def test_render_markdown_top_n_limits_combos_not_tickets():
 
 
 def test_render_markdown_flat_table_columns_roundtrip():
-    md = render_markdown([_roundtrip_ticket(100000)])
+    md = render_markdown([_roundtrip_ticket(100000, baggage_weight_kg=20)])
     header = next(line for line in md.splitlines() if line.startswith("| #"))
-    assert header == "| # | Даты | Туда | Обратно | Итого | Ссылка | Комментарий |"
+    assert header == "| # | Даты | Туда | Обратно | Итого | Багаж | Ссылка | Комментарий |"
+    row = next(line for line in md.splitlines() if "| 1 |" in line)
+    assert "20 кг" in row                        # честный вес багажа виден глазами
 
 
 def test_render_markdown_custom_direction_labels():
@@ -265,62 +268,3 @@ def test_comment_identical_flights_different_fare():
     md = render_markdown([_rt(100), _rt(180)])    # одинаковые рейсы, цены разные
     assert "другой тариф" in md
 
-
-# --------------------------- LiveReportWriter ---------------------------
-
-
-def _priced_ticket(price, date_iso="2026-09-15", signature=None):
-    sig = signature if signature is not None else f"sig-{price}"
-    return Ticket(
-        price_rub=price,
-        directions=[_direct_direction("MOW", "DPS", date_iso)],
-        has_baggage=True,
-        deep_link=f"https://www.aviasales.ru/search/x?t=SU_{sig}_{price}",
-        signature=sig,
-    )
-
-
-def test_live_report_writer_writes_report_on_first_update(tmp_path):
-    out = tmp_path / "report.md"
-    writer = LiveReportWriter(out, top_n=10)
-    writer.update([_priced_ticket(1000)])
-    text = out.read_text()
-    assert "Результаты поиска" in text
-    assert "1 000 ₽" in text
-
-
-def test_live_report_writer_skips_rewrite_when_top_unchanged(tmp_path):
-    out = tmp_path / "report.md"
-    writer = LiveReportWriter(out, top_n=10)
-    tickets = [_priced_ticket(1000), _priced_ticket(2000)]
-    writer.update(tickets)
-    out.unlink()  # если топ не изменился, файл не должен появиться снова
-    writer.update(list(tickets))
-    assert not out.exists()
-
-
-def test_live_report_writer_rewrites_when_top_changes(tmp_path):
-    out = tmp_path / "report.md"
-    writer = LiveReportWriter(out, top_n=10)
-    writer.update([_priced_ticket(2000)])
-    writer.update([_priced_ticket(1000), _priced_ticket(2000)])
-    assert "1 000 ₽" in out.read_text()
-
-
-def test_live_report_writer_ignores_combos_beyond_top_n(tmp_path):
-    out = tmp_path / "report.md"
-    writer = LiveReportWriter(out, top_n=2)
-    tickets = [_priced_ticket(1000, date_iso="2026-09-15"),
-               _priced_ticket(2000, date_iso="2026-09-16")]
-    writer.update(tickets)
-    out.unlink()
-    writer.update(tickets + [_priced_ticket(3000, date_iso="2026-09-17")])
-    assert not out.exists()                      # топ-2 комбинаций не изменился
-
-
-def test_live_report_writer_leaves_no_temp_files(tmp_path):
-    out = tmp_path / "report.md"
-    writer = LiveReportWriter(out, top_n=10)
-    writer.update([_priced_ticket(1000)])
-    writer.update([_priced_ticket(500), _priced_ticket(1000)])
-    assert [p.name for p in tmp_path.iterdir()] == ["report.md"]

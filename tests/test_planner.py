@@ -104,11 +104,15 @@ class FakeClient:
         self.default = default if default is not None else []
         self.calls: list[list] = []
         self.baggage_flags: list[bool] = []
+        self.min_baggage_weights: list = []
+        self.filters_states: list[dict] = []
 
     def search(self, dated_directions, passengers, trip_class, market_code, currency_code,
-              baggage_required=False):
+              baggage_required=False, min_baggage_weight_kg=None, filters_state=None):
         self.calls.append(list(dated_directions))
         self.baggage_flags.append(baggage_required)
+        self.min_baggage_weights.append(min_baggage_weight_kg)
+        self.filters_states.append(filters_state)
         dates = tuple(d[2] for d in dated_directions)
         return self.tickets_by_dates.get(dates, self.default)
 
@@ -304,6 +308,36 @@ def test_ticket_dict_roundtrip_preserves_ts_and_carrier_name():
     assert restored.directions[0].main_carrier_name == "China Southern Airlines"
 
 
+def test_ticket_dict_roundtrip_preserves_baggage_weight_agent_and_flags():
+    ticket = _ticket([_direct_direction("MOW", "IST", "2026-08-25")], price=150)
+    ticket.baggage_weight_kg = 20
+    ticket.agent_id = 183
+    ticket.changeable = True
+    ticket.refundable = False
+
+    restored = _ticket_from_dict(_ticket_to_dict(ticket))
+
+    assert restored.baggage_weight_kg == 20
+    assert restored.agent_id == 183
+    assert restored.changeable is True
+    assert restored.refundable is False
+
+
+def test_ticket_from_dict_defaults_new_fields_to_none_for_old_cache_records():
+    """Записи кэша до Task 9 не содержат новых полей -> обратная
+    совместимость: None, а не KeyError."""
+    ticket = _ticket([_direct_direction("MOW", "IST", "2026-08-25")], price=150)
+    legacy = _ticket_to_dict(ticket)
+    del legacy["baggage_weight_kg"], legacy["agent_id"], legacy["changeable"], legacy["refundable"]
+
+    restored = _ticket_from_dict(legacy)
+
+    assert restored.baggage_weight_kg is None
+    assert restored.agent_id is None
+    assert restored.changeable is None
+    assert restored.refundable is None
+
+
 # --------------------------- Planner ---------------------------
 
 
@@ -474,6 +508,83 @@ def test_planner_baggage_required_change_does_not_reuse_stale_cache_entry(tmp_pa
     Planner(baggage_itin, client, cache, now=now).plan()
     assert len(client.calls) == 2  # must NOT reuse the baggage-free cache entry
     assert client.baggage_flags == [False, True]
+
+
+def test_planner_derives_min_baggage_weight_as_max_over_directions(tmp_path):
+    """Тариф единый на весь билет -> самый строгий (максимальный) порог из
+    направлений применяется ко всему поиску (та же логика, что и
+    `_baggage_required`)."""
+    directions = [
+        _direction_cfg("MOW", "IST", "2026-08-25", "2026-08-25"),
+        _direction_cfg("IST", "MOW", "2026-08-26", "2026-08-26"),
+    ]
+    itinerary = _itinerary(
+        directions,
+        per_direction_cs=[
+            Constraints(baggage_min_weight_kg=10),
+            Constraints(baggage_min_weight_kg=20),
+        ],
+        date_samples_per_direction=1,
+    )
+    tickets_by_dates = {
+        ("2026-08-25", "2026-08-26"): [
+            _ticket([
+                _direct_direction("MOW", "IST", "2026-08-25"),
+                _direct_direction("IST", "MOW", "2026-08-26"),
+            ], price=150, has_baggage=True),
+        ],
+    }
+    client = FakeClient(tickets_by_dates)
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    planner = Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0))
+    planner.plan()
+    assert client.min_baggage_weights == [20]
+
+
+def test_planner_min_baggage_weight_none_when_no_direction_sets_it(tmp_path):
+    directions = [_direction_cfg("MOW", "IST", "2026-08-25", "2026-08-25")]
+    itinerary = _itinerary(directions, date_samples_per_direction=1)
+    tickets_by_dates = {
+        ("2026-08-25",): [_ticket([_direct_direction("MOW", "IST", "2026-08-25")], price=150)],
+    }
+    client = FakeClient(tickets_by_dates)
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    planner = Planner(itinerary, client, cache, now=dt.datetime(2026, 7, 26, 12, 0))
+    planner.plan()
+    assert client.min_baggage_weights == [None]
+
+
+def test_planner_per_direction_baggage_weight_change_does_not_reuse_stale_cache_entry(tmp_path):
+    """Regression (final review, finding 1): two configs differing ONLY by a
+    per-direction baggage_min_weight_kg must NOT collide on the same probe
+    cache key -- min_baggage_weight_kg is derived from per-direction
+    constraints and is not folded into filters_state (which only reflects
+    global_constraints), so it must be part of the planner's own cache key."""
+    directions = [_direction_cfg("MOW", "IST", "2026-08-25", "2026-08-25")]
+    tickets_by_dates = {
+        ("2026-08-25",): [_ticket([_direct_direction("MOW", "IST", "2026-08-25")], price=150)],
+    }
+    cache = ProbeCache(tmp_path / "probes.jsonl")
+    now = dt.datetime(2026, 7, 26, 12, 0)
+
+    light_itin = _itinerary(
+        directions,
+        per_direction_cs=[Constraints(baggage_min_weight_kg=10)],
+        date_samples_per_direction=1,
+    )
+    client = FakeClient(tickets_by_dates)
+    Planner(light_itin, client, cache, now=now).plan()
+    assert len(client.calls) == 1
+    assert client.min_baggage_weights == [10]
+
+    heavy_itin = _itinerary(
+        directions,
+        per_direction_cs=[Constraints(baggage_min_weight_kg=20)],
+        date_samples_per_direction=1,
+    )
+    Planner(heavy_itin, client, cache, now=now).plan()
+    assert len(client.calls) == 2  # must NOT reuse the weight=10 cache entry
+    assert client.min_baggage_weights == [10, 20]
 
 
 # --------------------------- deep links ---------------------------

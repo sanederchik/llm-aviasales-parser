@@ -14,6 +14,8 @@ from aviasales_search.trip_model import (
     TimeOfDay,
     Ticket,
     parse_config,
+    _parse_constraints,
+    _parse_direction,
 )
 
 
@@ -121,6 +123,11 @@ def test_ticket_route_round_trip_joins_directions():
 
 def _minimal_direction(from_="MOW", to="DPS", earliest="2026-09-01", latest="2026-09-30"):
     return {"from": from_, "to": to, "date_window": {"earliest": earliest, "latest": latest}}
+
+
+def _minimal_config():
+    """Минимальный конфиг для тестов, использующих parse_config."""
+    return {"directions": [_minimal_direction()]}
 
 
 def test_parse_config_minimal_ok_from_to_and_windows():
@@ -380,3 +387,138 @@ def test_effective_constraints_indexes_per_direction_independently():
     })
     assert cfg.effective_constraints(0).max_transfers == 0
     assert cfg.effective_constraints(1).max_transfers == 2  # falls back to global
+
+
+# --------------------------- request_delay_seconds ---------------------------
+
+
+def test_parse_config_request_delay_seconds_parsed():
+    cfg = parse_config({
+        "directions": [_minimal_direction()],
+        "search_budget": {"request_delay_seconds": {"min": 2.0, "max": 3.0}},
+    })
+    assert cfg.search_budget.delay_min_seconds == 2.0
+    assert cfg.search_budget.delay_max_seconds == 3.0
+
+
+def test_parse_config_default_request_delay_seconds():
+    cfg = parse_config({"directions": [_minimal_direction()]})
+    assert cfg.search_budget.delay_min_seconds == 0.5
+    assert cfg.search_budget.delay_max_seconds == 1.0
+
+
+def test_parse_config_rejects_delay_min_greater_than_max():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": [_minimal_direction()],
+            "search_budget": {"request_delay_seconds": {"min": 3.0, "max": 1.0}},
+        })
+
+
+def test_parse_config_rejects_negative_delay():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": [_minimal_direction()],
+            "search_budget": {"request_delay_seconds": {"min": -1, "max": 2}},
+        })
+
+
+def test_parse_config_rejects_non_numeric_delay():
+    with pytest.raises(ConfigError):
+        parse_config({
+            "directions": [_minimal_direction()],
+            "search_budget": {"request_delay_seconds": {"min": "fast", "max": 2}},
+        })
+
+
+# --------------------------- Task 6: Baggage fields ---------------------------
+
+
+def test_baggage_object_parsed():
+    c = _parse_constraints({"baggage": {"required": True, "min_weight_kg": 20}})
+    assert c.baggage_required is True
+    assert c.baggage_min_weight_kg == 20
+
+
+def test_baggage_weight_implies_required():
+    c = _parse_constraints({"baggage": {"min_weight_kg": 20}})
+    assert c.baggage_required is True  # вес без багажа не бывает
+
+
+def test_legacy_baggage_required_still_works():
+    c = _parse_constraints({"baggage_required": True})
+    assert c.baggage_required is True
+    assert c.baggage_min_weight_kg is None
+
+
+def test_baggage_min_weight_must_be_positive_int():
+    with pytest.raises(ConfigError):
+        _parse_constraints({"baggage": {"min_weight_kg": -5}})
+    with pytest.raises(ConfigError):
+        _parse_constraints({"baggage": {"min_weight_kg": "20"}})
+
+
+def test_large_handbag_parsed():
+    c = _parse_constraints({"baggage": {"large_handbag": True}})
+    assert c.large_handbag is True
+    assert c.baggage_required is None  # ручная кладь не подразумевает багаж
+
+
+# --------------------------- Task 6b: New constraint fields ---------------------------
+
+
+def test_new_scalar_constraint_fields_parsed():
+    c = _parse_constraints({
+        "max_price": 250000, "alliances": ["1"], "agents": ["aviasales|1"],
+        "payment_methods": ["card"], "aircraft_models": ["320"], "lowcosts": False,
+        "no_airport_change": True, "no_night_transfers": True,
+        "no_complex_transfers": True, "no_recheckin_transfers": True,
+        "no_interlines": True, "convenient_transfers": True,
+        "changeable_only": True, "refundable_only": True,
+    })
+    assert c.max_price == 250000 and c.alliances == ["1"]
+    assert c.no_night_transfers is True and c.refundable_only is True
+
+
+def test_depart_time_range_parsed():
+    c = _parse_constraints({"depart_time": {"from": "06:30", "to": "12:00"}})
+    assert c.depart_time == (dt.time(6, 30), dt.time(12, 0))
+
+
+def test_depart_time_bad_format_raises():
+    with pytest.raises(ConfigError):
+        _parse_constraints({"depart_time": {"from": "6:3", "to": "25:00"}})
+
+
+def test_direction_airport_lists_parsed():
+    direction, _ = _parse_direction({
+        "from": "MOW", "to": "TAS",
+        "date_window": {"earliest": "2026-09-10", "latest": "2026-09-30"},
+        "from_airports": ["DME", "SVO"], "to_airports": ["TAS"],
+    }, "direction 0")
+    assert direction.from_airports == ["DME", "SVO"]
+
+
+def test_same_airport_cities_parsed():
+    cfg = _minimal_config()
+    cfg["same_airport_cities"] = ["MOW"]
+    assert parse_config(cfg).same_airport_cities == ["MOW"]
+
+
+def test_max_price_must_be_positive():
+    with pytest.raises(ConfigError):
+        _parse_constraints({"max_price": -1})
+
+
+def test_boolean_constraint_fields_must_be_bool_not_string():
+    """Все 9 булевых полей должны отклонять не-bool значения (например строки)."""
+    bool_fields = [
+        "lowcosts", "no_airport_change", "no_night_transfers",
+        "no_complex_transfers", "no_recheckin_transfers", "no_interlines",
+        "convenient_transfers", "changeable_only", "refundable_only",
+    ]
+    for field in bool_fields:
+        with pytest.raises(ConfigError):
+            _parse_constraints({field: "false"})  # строка, а не bool
+        with pytest.raises(ConfigError):
+            _parse_constraints({field: 1})  # число, а не bool

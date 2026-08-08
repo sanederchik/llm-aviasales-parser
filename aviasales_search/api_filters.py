@@ -58,7 +58,8 @@ def _global_state(c: Constraints) -> dict:
                 state["baggage_weight"] = str(choice)
                 break
     if c.max_transfers is not None:
-        state["transfers_count"] = [str(i) for i in range(c.max_transfers + 1)]
+        lo = c.min_transfers if c.min_transfers is not None else 0
+        state["transfers_count"] = [str(i) for i in range(lo, c.max_transfers + 1)]
     if c.exclude_transfer_airports is not None and c.exclude_transfer_airports >= GULF_AIRPORTS:
         state["transfers_without_persian_gulf"] = True
     if c.max_duration_minutes is not None:

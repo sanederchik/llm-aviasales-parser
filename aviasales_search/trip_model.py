@@ -73,6 +73,7 @@ GULF_AIRPORTS: frozenset[str] = frozenset({
 @dataclass
 class Constraints:
     max_transfers: Optional[int] = None
+    min_transfers: Optional[int] = None
     max_transfer_minutes: Optional[int] = None
     baggage_required: Optional[bool] = None
     baggage_min_weight_kg: Optional[int] = None
@@ -341,6 +342,7 @@ def _parse_constraints(data: Optional[dict]) -> Constraints:
 
     return Constraints(
         max_transfers=data.get("max_transfers"),
+        min_transfers=data.get("min_transfers"),
         max_transfer_minutes=data.get("max_transfer_minutes"),
         baggage_required=baggage_required,
         baggage_min_weight_kg=baggage_min_weight_kg,

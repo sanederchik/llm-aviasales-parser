@@ -61,6 +61,8 @@ def passes_direction(dr: DirectionResult, c: Constraints) -> bool:
     """Проверка одного направления против набора ограничений."""
     if c.max_transfers is not None and dr.transfers > c.max_transfers:
         return False
+    if c.min_transfers is not None and dr.transfers < c.min_transfers:
+        return False
     if c.max_transfer_minutes is not None and any(
         g > c.max_transfer_minutes for g in _gap_minutes(dr)
     ):

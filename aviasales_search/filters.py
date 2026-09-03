@@ -146,8 +146,8 @@ def _min_baggage_weight_kg(itinerary: Itinerary) -> int | None:
     """Максимум `baggage_min_weight_kg` по effective_constraints всех
     направлений (тариф единый на весь билет -> самый строгий порог должен
     применяться ко всему билету). Та же семантика, что и
-    `planner.Planner._min_baggage_weight` -- держать их в согласии, иначе
-    сервер (planner) и клиентская страховка (здесь) разойдутся."""
+    `verifier.min_baggage_weight_for` (Фаза 2 переиспользует эту функцию) --
+    держать серверный запрос и клиентскую страховку (здесь) в согласии."""
     weights = [
         itinerary.effective_constraints(i).baggage_min_weight_kg
         for i in range(len(itinerary.directions))

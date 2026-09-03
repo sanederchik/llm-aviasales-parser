@@ -55,6 +55,23 @@ def probe_key(dated_directions: list[tuple], adults: int, children: int, infants
     return hashlib.sha1(canonical_json.encode()).hexdigest()
 
 
+def probe_cache_key(dated_directions, passengers, trip_class: str,
+                    baggage_required: bool, min_baggage_weight_kg,
+                    filters_state: dict) -> str:
+    """Полный ключ пробы, общий для Фазы 1 (LegSweeper) и Фазы 2 (ComboVerifier):
+    SHA1-база (`probe_key`) плюс суффикс `:{min_weight}:{filters_state}`. Обе
+    фазы ОБЯЗАНЫ строить ключ одинаково — иначе пробы либо молча не
+    переиспользуются, либо (при выпадении суффикса) переиспользуются пробы,
+    снятые под другими фильтрами/весом багажа. min_baggage_weight_kg выведен из
+    per-direction constraints и НЕ входит в filters_state (тот отражает только
+    global_constraints), поэтому включается в ключ отдельно."""
+    base = probe_key(
+        dated_directions, passengers.adults, passengers.children, passengers.infants,
+        trip_class, baggage_required=baggage_required,
+    )
+    return f"{base}:{min_baggage_weight_kg}:{json.dumps(filters_state, sort_keys=True)}"
+
+
 @dataclass
 class ProbeCache:
     path: Path

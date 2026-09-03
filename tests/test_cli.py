@@ -31,15 +31,35 @@ def _write_config(tmp_path, **overrides):
     return p
 
 
+def _one_way_results_text(results_text):
+    """Срез multi-city фикстуры до одного направления (segments[:1]) — имитация
+    ответа one-way поиска Фазы 1 (у настоящего one-way ответа одно направление;
+    combo-фикстура несёт два, и без среза их отфильтровал бы passes_itinerary
+    одноплечевого под-итинерария)."""
+    data = json.loads(results_text)
+    for chunk in data:
+        for t in chunk.get("tickets", []):
+            if t.get("segments"):
+                t["segments"] = t["segments"][:1]
+    return json.dumps(data)
+
+
 def _mock_transport(start_status=200, start_body=None, results_status=200, results_text=None):
     start_body = start_body if start_body is not None else {"search_id": "abc123"}
     results_text = results_text if results_text is not None else FIXTURE_RESULTS.read_text()
+    one_way_text = _one_way_results_text(results_text)
+    state = {"one_way": False}
 
     def transport(method, url, headers, cookies, body):
         if url == START_URL:
+            # Фаза 1 шлёт one-way START (одно направление) — запоминаем, чтобы на
+            # последующем RESULTS отдать одноплечевой срез; Фаза 2 шлёт multi-city.
+            directions = json.loads(body)["search_params"]["directions"]
+            state["one_way"] = len(directions) == 1
             return Response(status=start_status, text=json.dumps(start_body))
         if url == RESULTS_URL:
-            return Response(status=results_status, text=results_text)
+            text = one_way_text if state["one_way"] else results_text
+            return Response(status=results_status, text=text)
         raise AssertionError(f"unexpected url: {url}")
 
     return transport
@@ -264,13 +284,15 @@ def test_run_writes_progress_log_to_run_dir_and_stderr(tmp_path, capsys):
     assert len(runs) == 1
     log_text = (runs[0] / "search.log").read_text()
     lines = log_text.splitlines()
-    assert lines[0].startswith("Комбинаций дат: 1")
-    assert len(lines) == 2  # заголовок + одна комбинация
-    assert "MOW→DPS 2026-09-15" in lines[1]
+    # Две фазы, два заголовка: Фаза 1 (свип — 2 даты, по одной на плечо) и
+    # Фаза 2 (верификация — 1 комбо в ранкинге).
+    assert lines[0].startswith("Комбинаций дат: 2")  # свип: 2 даты
+    assert "Комбинаций дат: 1" in log_text            # верификация: 1 комбо
+    assert "MOW→DPS 2026-09-15" in log_text           # одноплечевая строка свипа
+    assert "DPS→MOW 2026-12-15" in log_text            # верификация комбо целиком
 
     captured = capsys.readouterr()
     assert lines[0] in captured.err  # прогресс дублируется в stderr
-    assert lines[1] in captured.err
     assert "Комбинаций дат" not in captured.out  # отчёт в stdout не замусорен
     assert "Комбинаций дат" not in out.read_text()
 
@@ -285,11 +307,12 @@ def test_run_defaults_write_report_and_cache_into_cwd(tmp_path, monkeypatch):
     code = run(args, now=dt.datetime(2026, 7, 26, 12, 0),
                transport=_mock_transport(), sleep=lambda _: None)
     assert code == 0
-    report = tmp_path / "reports" / "mow-dps-2026-09.md"
+    run_dir = tmp_path / "reports" / "2026-07-26__mow-dps-2026-09"
+    report = run_dir / "mow-dps-2026-09.md"
     assert report.exists()
     assert "Результаты поиска" in report.read_text()
-    assert (tmp_path / "reports" / "json" / "mow-dps-2026-09.json").exists()
-    assert (tmp_path / "reports" / "csv" / "mow-dps-2026-09.csv").exists()
+    assert (run_dir / "json" / "mow-dps-2026-09.json").exists()
+    assert (run_dir / "csv" / "mow-dps-2026-09.csv").exists()
     assert (tmp_path / "cache" / "probes.jsonl").exists()
     assert (tmp_path / "cache" / "runs").is_dir()
 
@@ -307,7 +330,11 @@ def test_default_report_path_multicity_slug(tmp_path):
              "date_window": {"earliest": "2026-11-15", "latest": "2026-11-15"}},
         ],
     })
-    assert str(default_report_path(config)) == "reports/mow-ist-dps-2026-09.md"
+    # Дата поиска (search_date) — не дата вылета; берётся отдельно, задаёт
+    # префикс папки прогона, чтобы повторные поиски того же маршрута не
+    # затирали друг друга.
+    path = default_report_path(config, search_date=dt.date(2026, 8, 5))
+    assert str(path) == "reports/2026-08-05__mow-ist-dps-2026-09/mow-ist-dps-2026-09.md"
 
 
 def test_top_default_is_unlimited():
@@ -355,15 +382,19 @@ def test_render_from_default_out_path_from_trip(tmp_path, monkeypatch):
     ])
     assert run(args1, now=dt.datetime(2026, 7, 26, 12, 0),
                transport=_mock_transport(), sleep=lambda _: None) == 0
-    json_path = tmp_path / "reports" / "json" / "mow-dps-2026-09.json"
+    run_dir = tmp_path / "reports" / "2026-07-26__mow-dps-2026-09"
+    json_path = run_dir / "json" / "mow-dps-2026-09.json"
 
     other = tmp_path / "elsewhere"
     other.mkdir()
     monkeypatch.chdir(other)
     args2 = parser.parse_args(["--render-from", str(json_path)])
+    # Пересобираем 27-го, но папка называется по исходной дате поиска (26-е,
+    # из generated_at в JSON) — не по дате самой пересборки.
     assert run(args2, now=dt.datetime(2026, 7, 27, 9, 0), transport=None) == 0
-    assert (other / "reports" / "mow-dps-2026-09.md").exists()
-    assert (other / "reports" / "csv" / "mow-dps-2026-09.csv").exists()
+    other_run_dir = other / "reports" / "2026-07-26__mow-dps-2026-09"
+    assert (other_run_dir / "mow-dps-2026-09.md").exists()
+    assert (other_run_dir / "csv" / "mow-dps-2026-09.csv").exists()
 
 
 def test_render_from_returns_1_on_missing_file(tmp_path, capsys):
@@ -419,10 +450,10 @@ def test_main_render_from_does_not_require_live_transport(tmp_path, monkeypatch)
     assert "Результаты поиска" in out2.read_text()
 
 
-def test_run_live_report_survives_mid_run_ban(tmp_path):
-    """Два дня в окне -> две комбинации. Первая уходит в сеть штатно, на второй
-    сервер отвечает 403 (бан). run() возвращает 2, но --out уже содержит
-    живой отчёт с билетами первой комбинации."""
+def test_run_intermediate_report_survives_mid_sweep_ban(tmp_path):
+    """Фаза 1 свипит плечи по датам. Первая дата уходит в сеть штатно, на второй
+    START сервер отвечает 403 (бан). run() возвращает 2, но живой промежуточный
+    отчёт (legs-*) уже содержит собранное до обрыва — Фаза 2 не начинается."""
     parser = build_arg_parser()
     out = tmp_path / "report.md"
     cfg = _write_config(
@@ -454,14 +485,16 @@ def test_run_live_report_survives_mid_run_ban(tmp_path):
     code = run(args, now=dt.datetime(2026, 7, 26, 12, 0),
                transport=transport, sleep=lambda _: None)
     assert code == 2
-    assert out.exists()
-    assert "Результаты поиска" in out.read_text()
-    assert "₽" in out.read_text()
 
-    json_live = tmp_path / "json" / "report.json"
-    csv_live = tmp_path / "csv" / "report.csv"
-    assert json.loads(json_live.read_text())["offers"]
-    assert len(csv_live.read_text().strip().splitlines()) >= 2
+    # Промежуточный отчёт (Фаза 1) записан живьём до бана: первая дата плеча 0
+    # успела собраться. Финального отчёта нет — Фаза 2 не запускалась.
+    legs_md = tmp_path / "legs-report.md"
+    legs_json = tmp_path / "json" / "legs-report.json"
+    assert legs_md.exists()
+    assert "## MOW→DPS" in legs_md.read_text()
+    data = json.loads(legs_json.read_text())
+    assert data["legs"][0]["dates"]  # плечо 0, дата 15.09 — собрана
+    assert not out.exists()  # финальный отчёт не создан (верификация не дошла)
 
 
 def test_run_passes_config_delays_to_client(tmp_path):
@@ -482,3 +515,26 @@ def test_run_passes_config_delays_to_client(tmp_path):
                transport=_mock_transport(), sleep=sleeps.append)
     assert code == 0
     assert sleeps and all(s == 9.0 for s in sleeps)
+
+
+def test_verify_top_flag_default_and_parse():
+    args = build_arg_parser().parse_args(["--config", "c.json", "--curl", "u.txt"])
+    assert args.verify_top == 60
+    args2 = build_arg_parser().parse_args(
+        ["--config", "c.json", "--curl", "u.txt", "--verify-top", "10"])
+    assert args2.verify_top == 10
+
+
+def test_legs_report_path_prefixes_legs():
+    from aviasales_search.cli import legs_report_path
+    from aviasales_search.trip_model import parse_config
+    cfg = parse_config({
+        "directions": [
+            {"from": "MOW", "to": "ALA",
+             "date_window": {"earliest": "2026-09-10", "latest": "2026-09-11"}},
+            {"from": "ALA", "to": "TAS",
+             "date_window": {"earliest": "2026-09-15", "latest": "2026-09-16"}},
+        ],
+    })
+    path = legs_report_path(cfg, search_date=dt.date(2026, 8, 5))
+    assert path == Path("reports") / "2026-08-05__mow-ala-tas-2026-09" / "legs-mow-ala-tas-2026-09.md"
